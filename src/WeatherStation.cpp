@@ -4,9 +4,10 @@
 #include <Adafruit_Sensor.h>
 #include <Arduino.h>
 #include <HardwareSerial.h>
-#include <NMEAGPS.h>
 #include <SPI.h>
+#include <TinyGPS++.h>
 #include <Wire.h>
+#include <SD.h>
 
 #include <sstream>
 #include <vector>
@@ -15,12 +16,12 @@
 #include "display.h"
 #include "pindefs.h"
 #include "sensors.h"
-
+#include "file.h"
 
 // Configure GPS serial interface to use UART2
 // HardwareSerial has to be used instead of Serial2 since the RX port for UART2
 // also the reset pin for the OLED display (because heltec hates us >:( )
-HardwareSerial GPSSerial(2);
+HardwareSerial SerialGPS(2);
 
 /**
     Function declarations
@@ -76,9 +77,12 @@ void setup() {
   while (!Serial) {
     yield();
   }
+  if (not SD.begin()) {
+    Serial.println("No SD card attached");
+  }
 
   // Start all devices
-  init_gps(GPSSerial, GPS_RX, GPS_TX);
+  
   init_display();
   bme.begin();
 
@@ -104,16 +108,18 @@ void setup() {
       0x06);  // functions that help with iPhone connections issue
   advertising->setMinPreferred(0x12);
   BLEDevice::startAdvertising();
+
+  SerialGPS.begin(9600, SERIAL_8N1, GPS_RX, GPS_TX);
 }
 
 // *******************************************************************************
 // * Processing loop
 // *******************************************************************************
 void loop() {
-  // Read GPS data
-  while (gps.available(GPSSerial)) {
-    // Save the gps data
-    gpsData = gps.read();
+  while (SerialGPS.available() > 0) {
+    char c = SerialGPS.read();
+    Serial.print(c);
+    gps.encode(c);
   }
   handleButtonPress();
 
@@ -121,11 +127,11 @@ void loop() {
   if (millis() - dataTimer >
       settings.intervals[settings.dataUpdateIntervalIndex] * 1000) {
     dataTimer = millis();
-    updateData(data, gpsData, settings.temperatureUnit);
-
-     // Send the data over bluetooth low energy
+    updateData(data, gps, settings.temperatureUnit);
+    writeData(SD, data, "/data.csv");
+    // Send the data over bluetooth low energy
     if (deviceConnected) {
-      bleSendTemperature(data,settings);
+      bleSendTemperature(data, settings);
       bleSendHumidity(data);
       bleSendPressure(data);
       bleSendWindSpeed(data);
@@ -136,7 +142,7 @@ void loop() {
   if (millis() - displayTimer >
       settings.intervals[settings.displayUpdateIntervalIndex] * 1000) {
     displayTimer = millis();
-    updateDisplay(display, data, settings, gpsData, frame, line);
+    updateDisplay(display, data, settings, gps, frame, line);
   }
 }
 
@@ -149,14 +155,14 @@ void handleButtonPress() {
   if (isRightButtonPressed) {
     isRightButtonPressed = false;
     frame = (frame + 1) % numFrames;
-    updateDisplay(display, data, settings, gpsData, frame, line);
+    updateDisplay(display, data, settings, gps, frame, line);
   }
 
   // Check if the user switched to a new menu item
   if (isDownButtonPressed) {
     isDownButtonPressed = false;
     line = (line + 1) % numSettings;
-    updateDisplay(display, data, settings, gpsData, frame, line);
+    updateDisplay(display, data, settings, gps, frame, line);
   }
 
   // Check if the user clicked on an item
@@ -179,7 +185,7 @@ void handleButtonPress() {
       default:
         break;
     }
-    updateDisplay(display, data, settings, gpsData, frame, line);
+    updateDisplay(display, data, settings, gps, frame, line);
   }
 }
 

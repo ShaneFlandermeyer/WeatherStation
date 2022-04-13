@@ -1,12 +1,14 @@
 #ifndef A93137F1_3D59_4BCC_AB39_F7BC8A5C538F
 #define A93137F1_3D59_4BCC_AB39_F7BC8A5C538F
 
+#include <TinyGPS++.h>
+
 #include "constants.h"
 #include "sensors.h"
 #include "settings.h"
 #include "pindefs.h"
 
-void updateDisplay(Adafruit_SSD1306 &display, SensorData data, gps_fix gpsData,
+void updateDisplay(Adafruit_SSD1306 &display, SensorData data, TinyGPSPlus gps,
                    int frame, int line);
 
 // OLED display frames
@@ -42,7 +44,7 @@ void init_display() {
       - line: The index of the selected line (after updating)
 */
 void updateDisplay(Adafruit_SSD1306 &display, SensorData data,
-                   Settings settings, gps_fix gpsData, int frame, int line) {
+                   Settings settings, TinyGPSPlus gps, int frame, int line) {
   display.clearDisplay();
   display.setCursor(0, 0);
   switch (frame) {
@@ -63,17 +65,21 @@ void updateDisplay(Adafruit_SSD1306 &display, SensorData data,
       display.setTextSize(2);
       display.println("GPS Data");
       display.setTextSize(1);
-      if (gpsData.status == gps_fix::STATUS_NONE) {
+      
+      display.println("Time: " + String(data.hour) + ":" +
+                      String(data.minute) + ":" +
+                      String(data.second) + " UTC");
+      if (not gps.location.isValid()) {
         display.println("Connecting...");
-      }
-      display.println("Time: " + String(gpsData.dateTime.hours) + ":" +
-                      String(gpsData.dateTime.minutes) + ":" +
-                      String(gpsData.dateTime.seconds) + " UTC");
-      display.println("Latitude: " + String(abs(data.lat)) +
+      } else {
+        display.println("Latitude: " + String(abs(data.lat)) +
                       (data.lat > 0 ? " N" : " S"));
-      display.println("Longitude: " + String(abs(data.lon)) +
-                      (data.lon > 0 ? " E" : " W"));
-      display.println("Speed: " + String(data.speed) + " mph");
+        display.println("Longitude: " + String(abs(data.lon)) +
+                        (data.lon > 0 ? " E" : " W"));
+        display.println("Altitude: " + String(data.alt) + "m");
+        display.println("Speed: " + String(data.speed) + " mph");
+      }
+      
     } break;
 
     case SETTINGS: {  // Display the settings tab
