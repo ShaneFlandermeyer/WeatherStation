@@ -97,6 +97,7 @@ void setup() {
   service->addCharacteristic(&humidityCharacteristic);
   service->addCharacteristic(&pressureCharacteristic);
   service->addCharacteristic(&windspeedCharacteristic);
+  service->addCharacteristic(&windDirectionCharacteristic);
 
   // Start the service
   service->start();
@@ -139,6 +140,7 @@ void loop() {
       bleSendHumidity(data);
       bleSendPressure(data);
       bleSendWindSpeed(data);
+      bleSendWindDirection(data);
     }
   }
 

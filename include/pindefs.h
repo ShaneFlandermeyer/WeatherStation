@@ -18,6 +18,7 @@
 #define UV3 38
 #define UV4 39
 #define UV5 34
+#define WINDDIRECTION 35
 #define RV 36
 #define TMP 37
 #define FIX 38

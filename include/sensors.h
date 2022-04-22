@@ -11,6 +11,7 @@
 #include "settings.h"
 
 float readWindSpeed();
+float readWindDirection();
 float readTemperature(int units);
 
 std::vector<float> readUV();
@@ -21,6 +22,7 @@ struct SensorData {
   int humidity;
   float pressure;
   float windSpeed;
+  float windDirection;
   std::vector<float> uv;
   float lat;
   float lon;
@@ -58,7 +60,7 @@ void updateData(SensorData& data, TinyGPSPlus gps, int temperatureUnit) {
   data.humidity = bme.readHumidity();
   data.pressure = bme.readPressure() / 100;
   data.windSpeed = readWindSpeed();
-
+  data.windDirection = readWindDirection();
   data.uv = readUV();
 }
 
@@ -111,6 +113,11 @@ float readWindSpeed() {
   // The constants b and c were determined by some Excel wrangling with the
   // solver.
   return pow(((rv_v - zero_wind_v) / .2300), 2.7265);
+}
+
+float readWindDirection() {
+  // Convert the voltage to an angle
+  return analogRead(WINDDIRECTION)*ADC_TO_VOLTAGE/5*359;
 }
 
 /**

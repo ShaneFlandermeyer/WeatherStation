@@ -11,8 +11,10 @@
 #define SERVICE_UUID "181A"
 #define TEMPERATURE_UUID "2A1C"
 #define WIND_SPEED_UUID "2A72"
+#define WIND_DIRECTION_UUID "2A73"
 #define HUMIDITY_UUID "2A6F"
 #define PRESSURE_UUID "2A6D"
+
 
 // BLE characteristics
 BLECharacteristic temperatureCharacteristic(
@@ -26,6 +28,9 @@ BLECharacteristic pressureCharacteristic(PRESSURE_UUID,
                                              BLECharacteristic::PROPERTY_READ);
 BLECharacteristic windspeedCharacteristic(WIND_SPEED_UUID,
                                           BLECharacteristic::PROPERTY_NOTIFY |
+                                              BLECharacteristic::PROPERTY_READ);
+BLECharacteristic windDirectionCharacteristic(WIND_DIRECTION_UUID,
+BLECharacteristic::PROPERTY_NOTIFY |
                                               BLECharacteristic::PROPERTY_READ);
 
 void bleSendTemperature(const SensorData& data, const Settings& settings) {
@@ -59,6 +64,12 @@ void bleSendWindSpeed(const SensorData& data) {
   uint16_t windspeed = round(data.windSpeed * 100.0);
   windspeedCharacteristic.setValue((uint8_t*)&windspeed, 2);
   windspeedCharacteristic.notify();
+}
+
+void bleSendWindDirection(const SensorData &data) {
+  uint16_t windDirection = round(data.windDirection * 100.0);
+  windDirectionCharacteristic.setValue((uint8_t*)&windDirection, 2);
+  windDirectionCharacteristic.notify();
 }
 
 #endif /* F6837E0A_A91C_4BFE_9070_93D920E5CE82 */
