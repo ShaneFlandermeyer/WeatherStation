@@ -35,22 +35,24 @@ struct SensorData {
 /**
    Sensor objects
 */
-std::vector<int> uvPins = {UV1, UV2, UV3, UV4};
+std::vector<int> uvPins = {UV1, UV2, UV3, UV4, UV5};
 TinyGPSPlus gps;
 Adafruit_BME280 bme(BME_CS);
 SensorData data;
 
 void updateData(SensorData& data, TinyGPSPlus gps, int temperatureUnit) {
   // GPS data
+  if (gps.time.isValid()) {
+    data.minute = gps.time.minute();
+    data.second = gps.time.second();
+    data.date = gps.date.value();
+  }
   if (gps.location.isValid()) {
     data.lat = gps.location.lat();
     data.lon = gps.location.lng();
     data.alt = gps.altitude.meters();
     data.speed = gps.speed.mph();
     data.hour = gps.time.hour();
-    data.minute = gps.time.minute();
-    data.second = gps.time.second();
-    data.date = gps.date.value();
   }
   data.temperature = readTemperature(temperatureUnit);
   data.humidity = bme.readHumidity();
@@ -118,6 +120,8 @@ std::vector<float> readUV() {
   std::vector<float> uvIndex(uvPins.size());
   for (int i = 0; i < uvPins.size(); i++) {
     uvIndex[i] = analogRead(uvPins[i]) * ADC_TO_VOLTAGE / 0.1;
+
+    Serial.println(uvIndex[i]);
   }
   return uvIndex;
 }

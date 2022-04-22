@@ -36,10 +36,11 @@ void handleButtonPress();
 */
 uint8_t frame = 0;
 uint8_t line = 0;
-uint8_t numFrames = 3;
+uint8_t numFrames = 2;
 uint8_t numSettings = 3;
 uint32_t displayTimer = millis();
 uint32_t dataTimer = millis();
+uint32_t frameTimer = millis();
 
 /*
     IO variables
@@ -120,6 +121,9 @@ void loop() {
     char c = SerialGPS.read();
     Serial.print(c);
     gps.encode(c);
+    // Serial.println(gps.time.second());
+
+
   }
   handleButtonPress();
 
@@ -142,6 +146,12 @@ void loop() {
   if (millis() - displayTimer >
       settings.intervals[settings.displayUpdateIntervalIndex] * 1000) {
     displayTimer = millis();
+    updateDisplay(display, data, settings, gps, frame, line);
+  }
+
+  if (millis() - frameTimer > 5000) {
+    frameTimer = millis();
+    frame = (frame + 1) % numFrames;
     updateDisplay(display, data, settings, gps, frame, line);
   }
 }

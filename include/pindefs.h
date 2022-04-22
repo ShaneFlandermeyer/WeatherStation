@@ -13,10 +13,11 @@
 #define BME_SCK 18
 #define BME_MISO 19
 #define BME_MOSI 23
-#define UV1 25
-#define UV2 26
-#define UV3 27
-#define UV4 33
+#define UV1 26
+#define UV2 27
+#define UV3 38
+#define UV4 39
+#define UV5 34
 #define RV 36
 #define TMP 37
 #define FIX 38
