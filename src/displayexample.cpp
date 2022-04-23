@@ -18,7 +18,7 @@ void handleButtonPress();
 */
 // uint8_t line = 0;
 // uint8_t frame = 0;
-uint8_t displayTimer = millis();
+uint64_t displayTimer = millis();
 
 /*
     IO variables
@@ -57,10 +57,11 @@ void loop() {
   // Periodic display update
   handleButtonPress();
   if (millis() - displayTimer >
-      settings.intervals[settings.displayUpdateIntervalIndex] * 1000) {
+      1000) {
     displayTimer = millis();
     updateDisplay(oled, tft, data, settings, gps, tftState);
   }
+  data.temperature += 1;
 }
 
 //****************************************************************************
@@ -87,27 +88,8 @@ void handleButtonPress() {
   if (isSelectButtonPressed) {
     updateDisplay(oled, tft, data, settings, gps, tftState);
     isSelectButtonPressed = false;
-    // redraw = true;
-    // substate = 0;
-    // tftState = (tftState + 1) % NUM_MENUS;
-    // switch (line) {
-    //   case DISPLAYRATE:  // Update rate changed
-    //     settings.displayUpdateIntervalIndex =
-    //         (settings.displayUpdateIntervalIndex + 1) %
-    //         settings.intervals.size();
-    //     break;
-    //   case DATARATE:
-    //     settings.dataUpdateIntervalIndex =
-    //         (settings.dataUpdateIntervalIndex + 1) %
-    //         settings.intervals.size();
-    //     break;
-    //   case TEMPERATUREUNIT:  // Temperature unit changed
-    //     settings.temperatureUnit =
-    //         (settings.temperatureUnit == FAHRENHEIT ? CELSIUS : FAHRENHEIT);
-    //     break;
-    //   default:
-    //     break;
-    // }
+    // TODO: Remove this and replace the above updateDisplay with a parameter handler
+    updateDisplay(oled, tft, data, settings, gps, tftState);
   }
 }
 
