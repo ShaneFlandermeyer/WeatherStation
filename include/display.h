@@ -155,19 +155,18 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
           tft.setCursor(80, 10);
           tft.setTextColor(ILI9341_WHITE);
           tft.println("MAIN MENU");
-          tft.setTextSize(1);
           // Sensor readings box
-          tft.fillRect(20, 50, 130, 50, ILI9341_BLACK);
-          tft.drawRect(20, 50, 130, 50, ILI9341_WHITE);
+          tft.fillRect(20, 50, 240, 50, ILI9341_BLACK);
+          tft.drawRect(20, 50, 240, 50, ILI9341_WHITE);
           // Settings box
-          tft.fillRect(20, 110, 130, 50, ILI9341_BLACK);
-          tft.drawRect(20, 110, 130, 50, ILI9341_WHITE);
+          tft.fillRect(20, 110, 240, 50, ILI9341_BLACK);
+          tft.drawRect(20, 110, 240, 50, ILI9341_WHITE);
           // Sleep box
-          tft.fillRect(20, 170, 130, 50, ILI9341_BLACK);
-          tft.drawRect(20, 170, 130, 50, ILI9341_WHITE);
+          tft.fillRect(20, 170, 240, 50, ILI9341_BLACK);
+          tft.drawRect(20, 170, 240, 50, ILI9341_WHITE);
         }
         substate = substate % 3;
-        tft.setTextSize(1);
+        tft.setTextSize(2);
         tft.setTextColor(ILI9341_WHITE);
         switch (substate) {
           case 0:

@@ -62,6 +62,7 @@ void loop() {
     updateDisplay(oled, tft, data, settings, gps, tftState);
   }
   data.temperature += 1;
+
 }
 
 //****************************************************************************
