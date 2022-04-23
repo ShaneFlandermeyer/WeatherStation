@@ -178,12 +178,6 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
             tft.setTextColor(ILI9341_GREEN);
             tft.setCursor(40, 70);
             tft.println("Sensor Readings");
-            if (isSelectButtonPressed) {
-              tftState = SENSORS;
-              sensorScreenPos = 0;
-              substate = 0;
-              redraw = true;
-            }
             break;
           case 1:
             tft.setCursor(40, 70);
@@ -193,11 +187,6 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
             tft.setTextColor(ILI9341_GREEN);
             tft.setCursor(40, 130);
             tft.println("Settings");
-            if (isSelectButtonPressed) {
-              tftState = SETTINGS;
-              substate = 0;
-              redraw = true;
-            }
             break;
           case 2:
             tft.setCursor(40, 70);
@@ -239,7 +228,7 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
           tft.print("TEMPERATURE: ");
           tft.setCursor(160, 60);
           tft.print(String((int)data.temperature % 100) +
-                      (settings.temperatureUnit == FAHRENHEIT ? "F" : "C"));
+                    (settings.temperatureUnit == FAHRENHEIT ? "F" : "C"));
           tft.setCursor(15, 80);
           tft.print("HUMIDITY: ");
           tft.setCursor(160, 80);
@@ -289,10 +278,6 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
             tft.setCursor(35, 195);
             tft.println("<-");
             // Select button pressed
-            if (isSelectButtonPressed && sensorScreenPos == 1) {
-              sensorScreenPos = 0;
-              redraw = true;
-            }
             break;
           case 1:
             tft.setCursor(35, 195);
@@ -302,10 +287,6 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
             tft.setTextColor(ILI9341_GREEN);
             tft.setCursor(105, 195);
             tft.println("->");
-            if (isSelectButtonPressed && sensorScreenPos == 0) {
-              sensorScreenPos = 1;
-              redraw = true;
-            }
             break;
           case 2:
             tft.setCursor(35, 195);
@@ -315,13 +296,6 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
             tft.setTextColor(ILI9341_GREEN);
             tft.setCursor(205, 195);
             tft.println("<<<");
-            if (isSelectButtonPressed) {
-              tftState = MAINMENU;
-              substate = 0;
-              redraw = true;
-              // This shouldn't be needed, but it is for some reason
-              isSelectButtonPressed = false;
-            }
             break;
         }
         break;
@@ -360,11 +334,6 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
             tft.setCursor(15, 60);
             tft.print("TEMPERATURE UNIT: ");
             tft.println(settings.temperatureUnit == FAHRENHEIT ? "F" : "C");
-            if (isSelectButtonPressed) {
-              settings.temperatureUnit =
-                  (settings.temperatureUnit == FAHRENHEIT) ? CELSIUS
-                                                           : FAHRENHEIT;
-            }
             break;
 
           case 1:  // Display update interval field selected
@@ -385,13 +354,6 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
             tft.print("DISPLAY UPDATE: ");
             tft.print(settings.intervals[settings.displayUpdateIntervalIndex]);
             tft.println(" s");
-            if (isSelectButtonPressed) {
-              settings.displayUpdateIntervalIndex =
-                  (settings.displayUpdateIntervalIndex + 1) %
-                  settings.intervals.size();
-              // redraw = true;
-              isSelectButtonPressed = false;
-            }
             break;
 
           case 2:  // Data update interval field selected
@@ -412,13 +374,6 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
             tft.print("DATA UPDATE: ");
             tft.print(settings.intervals[settings.dataUpdateIntervalIndex]);
             tft.println(" s");
-            if (isSelectButtonPressed) {
-              settings.dataUpdateIntervalIndex =
-                  (settings.dataUpdateIntervalIndex + 1) %
-                  settings.intervals.size();
-              // redraw = true;
-              isSelectButtonPressed = false;
-            }
             break;
 
           case 3:  // OLED screen field selected
@@ -439,11 +394,6 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
             tft.setCursor(15, 120);
             tft.print("OLED SCREEN: ");
             tft.println(settings.useOled ? "ON" : "OFF");
-            if (isSelectButtonPressed) {
-              settings.useOled = !settings.useOled;
-              // redraw = true;
-              isSelectButtonPressed = false;
-            }
             break;
 
           case 4:  // Back button selected
@@ -464,12 +414,91 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
             tft.setTextColor(ILI9341_GREEN);
             tft.setCursor(205, 195);
             tft.println("<<<");
-            if (isSelectButtonPressed) {
-              substate = 0;
+            break;
+        }
+    }
+  }
+}
+
+/**
+ * Update display parameters based on button inputs and the current state
+ * 
+ */
+void updateDisplayParams() {
+  if (useOled) {
+  } else {
+    switch (tftState) {
+      case MAINMENU:
+        substate = substate % 3;
+        switch (substate) {
+          case 0:
+            tftState = SENSORS;
+            sensorScreenPos = 0;
+            substate = 0;
+            redraw = true;
+            break;
+          case 1:
+            tftState = SETTINGS;
+            substate = 0;
+            redraw = true;
+            break;
+          case 2:
+            break;
+        }
+        break;
+
+      case SENSORS:
+        substate = substate % 3;
+        switch (substate) {
+          case 0:
+            // Select button pressed
+            if (sensorScreenPos == 1) {
+              sensorScreenPos = 0;
               redraw = true;
-              tftState = MAINMENU;
-              isSelectButtonPressed = false;
             }
+            break;
+          case 1:
+            if (sensorScreenPos == 0) {
+              sensorScreenPos = 1;
+              redraw = true;
+            }
+            break;
+          case 2:
+            tftState = MAINMENU;
+            substate = 0;
+            redraw = true;
+            // This shouldn't be needed, but it is for some reason
+            break;
+        }
+        break;
+
+      case SETTINGS:
+        switch (substate) {
+          case 0:  // Temperature unit field selected
+            settings.temperatureUnit =
+                (settings.temperatureUnit == FAHRENHEIT) ? CELSIUS : FAHRENHEIT;
+            break;
+
+          case 1:  // Display update interval field selected
+            settings.displayUpdateIntervalIndex =
+                (settings.displayUpdateIntervalIndex + 1) %
+                settings.intervals.size();
+            break;
+
+          case 2:  // Data update interval field selected
+            settings.dataUpdateIntervalIndex =
+                (settings.dataUpdateIntervalIndex + 1) %
+                settings.intervals.size();
+            break;
+
+          case 3:  // OLED screen field selected
+            settings.useOled = !settings.useOled;
+            break;
+
+          case 4:  // Back button selected
+            substate = 0;
+            redraw = true;
+            tftState = MAINMENU;
             break;
         }
     }
