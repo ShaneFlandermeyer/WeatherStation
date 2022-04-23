@@ -1,7 +1,10 @@
 #ifndef B32C52E8_0A82_4B4F_BB96_D6D227CC2F94
 #define B32C52E8_0A82_4B4F_BB96_D6D227CC2F94
 
+#include <Adafruit_BME280.h>
+#include <Adafruit_Sensor.h>
 #include <HardwareSerial.h>
+#include <TinyGPS++.h>
 
 #include <vector>
 
@@ -117,7 +120,7 @@ float readWindSpeed() {
 
 float readWindDirection() {
   // Convert the voltage to an angle
-  return analogRead(WINDDIRECTION)*ADC_TO_VOLTAGE/5*359;
+  return analogRead(WINDDIRECTION) * ADC_TO_VOLTAGE / 5 * 359;
 }
 
 /**
