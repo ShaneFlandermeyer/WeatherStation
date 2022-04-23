@@ -85,7 +85,6 @@ void handleButtonPress() {
 
   // Check if the user clicked on an item
   if (isSelectButtonPressed) {
-    
     updateDisplay(oled, tft, data, settings, gps, tftState);
     isSelectButtonPressed = false;
     // redraw = true;

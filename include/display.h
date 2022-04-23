@@ -237,47 +237,73 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
           // Down button
           tft.fillRect(20, 180, 60, 50, ILI9341_BLACK);
           tft.drawRect(20, 180, 60, 50, ILI9341_WHITE);
-          // tft.setCursor(35, 195);
-          // tft.println("<-");
           // Up button
           tft.fillRect(90, 180, 60, 50, ILI9341_BLACK);
           tft.drawRect(90, 180, 60, 50, ILI9341_WHITE);
-          // tft.setCursor(105, 195);
-          // tft.println("->");
           // Back button
           tft.fillRect(180, 180, 120, 50, ILI9341_BLACK);
           tft.drawRect(180, 180, 120, 50, ILI9341_WHITE);
-          // TODO: Plug in values for this
           if (sensorScreenPos == 0) {
             tft.setCursor(100, 10);
             tft.println("SENSORS");
             tft.setTextSize(2);
             tft.setCursor(15, 60);
-            tft.println("TEMPERATURE:");
+            tft.print("TEMPERATURE: ");
+            tft.print(data.temperature);
+            tft.println(settings.temperatureUnit == FAHRENHEIT ? " F" : " C");
             tft.setCursor(15, 80);
-            tft.println("HUMIDITY:");
+            tft.print("HUMIDITY: ");
+            tft.print(data.humidity);
+            tft.println(" %");
             tft.setCursor(15, 100);
-            tft.println("UV INDEX:");
+            tft.print("UV INDEX: ");
+            // TODO: Average UV sensor readings
+            tft.println(1337);
             tft.setCursor(15, 120);
-            tft.println("WIND SPEED:");
+            tft.print("WIND SPEED: ");
+            tft.print(data.windSpeed);
+            tft.println(" mph");
             tft.setCursor(15, 140);
-            tft.println("WIND DIRECTION:");
+            tft.print("WIND DIRECTION: ");
+            tft.print(data.windDirection);
+            tft.println(" deg");
             tft.setTextSize(3);
           } else {
+            //     oled.println("Time: " + String(data.hour) + ":" +
+            //     String(data.minute)
+            //     +
+            //                  ":" + String(data.second) + " UTC");
+            //     if (not gps.location.isValid()) {
+            //       oled.println("Connecting...");
+            //     } else {
+            //       oled.println("Latitude: " + String(abs(data.lat)) +
+            //                    (data.lat > 0 ? " N" : " S"));
+            //       oled.println("Longitude: " + String(abs(data.lon)) +
+            //                    (data.lon > 0 ? " E" : " W"));
+            //       oled.println("Altitude: " + String(data.alt) + "m");
+            //       oled.println("Speed: " + String(data.speed) + " mph");
             tft.setCursor(100, 10);
-            tft.println("SENSORS2");
+            tft.println("SENSORS");
             tft.setTextSize(2);
             tft.setCursor(15, 60);
-            tft.println("TEMPERATURE:");
-            tft.setCursor(15, 80);
-            tft.println("HUMIDITY:");
-            tft.setCursor(15, 100);
-            tft.println("UV INDEX:");
-            tft.setCursor(15, 120);
-            tft.println("WIND SPEED:");
-            tft.setCursor(15, 140);
-            tft.println("WIND DIRECTION:");
-            tft.setTextSize(3);
+            tft.print("TIME: ");
+            tft.println(String(data.hour) + ":" + String(data.minute) + ":" +
+                        String(data.second) + " UTC");
+            if (not gps.location.isValid()) {
+              tft.println("Connecting...");
+            } else {
+              tft.setCursor(15, 80);
+              tft.println("LATITUDE: " + String(abs(data.lat)) +
+                          (data.lat > 0 ? " N" : " S"));
+              tft.setCursor(15, 100);
+              tft.println("Longitude: " + String(abs(data.lon)) +
+                           (data.lon > 0 ? " E" : " W"));
+              tft.setCursor(15, 120);
+              tft.println("Altitude: " + String(data.alt) + " m");
+              tft.setCursor(15, 140);
+              tft.println("Speed: " + String(data.speed) + " mph");
+              tft.setTextSize(3);
+            }
           }
         }
         substate = substate % 3;
@@ -294,8 +320,8 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
             tft.println("<-");
             // Select button pressed
             if (isSelectButtonPressed && sensorScreenPos == 1) {
-                sensorScreenPos = 0;
-                redraw = true;
+              sensorScreenPos = 0;
+              redraw = true;
             }
             break;
           case 1:
@@ -307,8 +333,8 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
             tft.setCursor(105, 195);
             tft.println("->");
             if (isSelectButtonPressed && sensorScreenPos == 0) {
-                sensorScreenPos = 1;
-                redraw = true;
+              sensorScreenPos = 1;
+              redraw = true;
             }
             break;
           case 2:
@@ -320,9 +346,11 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
             tft.setCursor(205, 195);
             tft.println("<<<");
             if (isSelectButtonPressed) {
-                tftState = MAINMENU;
-                redraw = true;
-                substate = 0;
+              tftState = MAINMENU;
+              substate = 0;
+              redraw = true;
+              // This shouldn't be needed, but it is for some reason
+              isSelectButtonPressed = false;
             }
             break;
         }
