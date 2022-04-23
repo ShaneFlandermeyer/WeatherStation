@@ -1,4 +1,5 @@
 #include <Arduino.h>
+
 #include "display.h"
 #include "pindefs.h"
 
@@ -6,7 +7,7 @@
     Function declarations
 */
 void rightButtonPressed();
-void downButtonPressed();
+void leftbuttonPressed();
 void selectButtonPressed();
 void handleButtonPress();
 
@@ -15,29 +16,24 @@ void handleButtonPress();
    TODO: Move to display.h
    TODO: Add OLED variables
 */
-uint8_t line = 0;
-uint8_t frame = 0;
+// uint8_t line = 0;
+// uint8_t frame = 0;
 uint8_t displayTimer = millis();
-
 
 /*
     IO variables
 */
-volatile bool isRightButtonPressed = false;
-volatile bool isDownButtonPressed = false;
-volatile bool isSelectButtonPressed = false;
 volatile uint32_t buttonPressTime = 0;
-
 
 void setup() {
   // Input handling
   pinMode(RIGHTBUTTON, INPUT_PULLUP);
-  pinMode(DOWNBUTTON, INPUT_PULLUP);
+  pinMode(LEFTBUTTON, INPUT_PULLUP);
   pinMode(SELECTBUTTON, INPUT_PULLUP);
   // Attach interrupt functions
   attachInterrupt(digitalPinToInterrupt(RIGHTBUTTON), rightButtonPressed,
                   FALLING);
-  attachInterrupt(digitalPinToInterrupt(DOWNBUTTON), downButtonPressed,
+  attachInterrupt(digitalPinToInterrupt(LEFTBUTTON), leftbuttonPressed,
                   FALLING);
   attachInterrupt(digitalPinToInterrupt(SELECTBUTTON), selectButtonPressed,
                   FALLING);
@@ -63,7 +59,7 @@ void loop() {
   if (millis() - displayTimer >
       settings.intervals[settings.displayUpdateIntervalIndex] * 1000) {
     displayTimer = millis();
-    updateDisplay(oled, tft, data, settings, gps, tftState, line);
+    updateDisplay(oled, tft, data, settings, gps, tftState);
   }
 }
 
@@ -73,42 +69,47 @@ void loop() {
 
 void handleButtonPress() {
   // Check if the user switched to a new menu tab
-  if (isRightButtonPressed) { // TODO: Rename this to right button
+  if (isRightButtonPressed) {
     isRightButtonPressed = false;
     substate += 1;
     Serial.println(substate);
-    updateDisplay(oled, tft, data, settings, gps, tftState, line);
+    updateDisplay(oled, tft, data, settings, gps, tftState);
   }
 
   // Check if the user switched to a new menu item
-  if (isDownButtonPressed) { // TODO: Rename this to left button
-    isDownButtonPressed = false;
+  if (isLeftButtonPressed) {
+    isLeftButtonPressed = false;
     substate -= ((substate == 0) ? 0 : 1);
-    updateDisplay(oled, tft, data, settings, gps, tftState, line);
+    updateDisplay(oled, tft, data, settings, gps, tftState);
   }
 
   // Check if the user clicked on an item
-  // if (isSelectButtonPressed) {
-  //   isSelectButtonPressed = false;
-  //   switch (line) {
-  //     case DISPLAYRATE:  // Update rate changed
-  //       settings.displayUpdateIntervalIndex =
-  //           (settings.displayUpdateIntervalIndex + 1) %
-  //           settings.intervals.size();
-  //       break;
-  //     case DATARATE:
-  //       settings.dataUpdateIntervalIndex =
-  //           (settings.dataUpdateIntervalIndex + 1) % settings.intervals.size();
-  //       break;
-  //     case TEMPERATUREUNIT:  // Temperature unit changed
-  //       settings.temperatureUnit =
-  //           (settings.temperatureUnit == FAHRENHEIT ? CELSIUS : FAHRENHEIT);
-  //       break;
-  //     default:
-  //       break;
-  //   }
-  //   updateDisplay(oled, tft, data, settings, gps, frame, line);
-  // }
+  if (isSelectButtonPressed) {
+    
+    updateDisplay(oled, tft, data, settings, gps, tftState);
+    isSelectButtonPressed = false;
+    // redraw = true;
+    // substate = 0;
+    // tftState = (tftState + 1) % NUM_MENUS;
+    // switch (line) {
+    //   case DISPLAYRATE:  // Update rate changed
+    //     settings.displayUpdateIntervalIndex =
+    //         (settings.displayUpdateIntervalIndex + 1) %
+    //         settings.intervals.size();
+    //     break;
+    //   case DATARATE:
+    //     settings.dataUpdateIntervalIndex =
+    //         (settings.dataUpdateIntervalIndex + 1) %
+    //         settings.intervals.size();
+    //     break;
+    //   case TEMPERATUREUNIT:  // Temperature unit changed
+    //     settings.temperatureUnit =
+    //         (settings.temperatureUnit == FAHRENHEIT ? CELSIUS : FAHRENHEIT);
+    //     break;
+    //   default:
+    //     break;
+    // }
+  }
 }
 
 void rightButtonPressed() {
@@ -119,10 +120,10 @@ void rightButtonPressed() {
   }
 }
 
-void downButtonPressed() {
+void leftbuttonPressed() {
   int timeNow = millis();
   if (timeNow > buttonPressTime + 250) {
-    isDownButtonPressed = true;
+    isLeftButtonPressed = true;
     buttonPressTime = timeNow;
   }
 }

@@ -5,7 +5,7 @@
 #define TFT_RST 3
 #define OLED_SDA 4
 #define TFT_DC 5
-#define DOWNBUTTON 12
+#define LEFTBUTTON 12
 #define SELECTBUTTON 13
 #define RIGHTBUTTON 14
 #define OLED_SCL 15

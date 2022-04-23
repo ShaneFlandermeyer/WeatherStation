@@ -25,7 +25,7 @@
 //     Function declarations
 // */
 // void rightButtonPressed();
-// void downButtonPressed();
+// void leftbuttonPressed();
 // void selectButtonPressed();
 // void handleButtonPress();
 
@@ -44,7 +44,7 @@
 //     IO variables
 // */
 // volatile bool isRightButtonPressed = false;
-// volatile bool isDownButtonPressed = false;
+// volatile bool isLeftButtonPressed = false;
 // volatile bool isSelectButtonPressed = false;
 // volatile uint32_t buttonPressTime = 0;
 
@@ -61,12 +61,12 @@
 // void setup() {
 //   // Input handling
 //   pinMode(RIGHTBUTTON, INPUT_PULLUP);
-//   pinMode(DOWNBUTTON, INPUT_PULLUP);
+//   pinMode(LEFTBUTTON, INPUT_PULLUP);
 //   pinMode(SELECTBUTTON, INPUT_PULLUP);
 //   // Attach interrupt functions
 //   attachInterrupt(digitalPinToInterrupt(RIGHTBUTTON), rightButtonPressed,
 //                   FALLING);
-//   attachInterrupt(digitalPinToInterrupt(DOWNBUTTON), downButtonPressed,
+//   attachInterrupt(digitalPinToInterrupt(LEFTBUTTON), leftbuttonPressed,
 //                   FALLING);
 //   attachInterrupt(digitalPinToInterrupt(SELECTBUTTON), selectButtonPressed,
 //                   FALLING);
@@ -175,8 +175,8 @@
 //   }
 
 //   // Check if the user switched to a new menu item
-//   if (isDownButtonPressed) {
-//     isDownButtonPressed = false;
+//   if (isLeftButtonPressed) {
+//     isLeftButtonPressed = false;
 //     line = (line + 1) % numSettings;
 //     updateDisplay(oled, tft, data, settings, gps, frame, line);
 //   }
@@ -213,10 +213,10 @@
 //   }
 // }
 
-// void downButtonPressed() {
+// void leftbuttonPressed() {
 //   int timeNow = millis();
 //   if (timeNow > buttonPressTime + 250) {
-//     isDownButtonPressed = true;
+//     isLeftButtonPressed = true;
 //     buttonPressTime = timeNow;
 //   }
 // }
