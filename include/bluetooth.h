@@ -8,12 +8,16 @@
 #include "sensors.h"
 #include "settings.h"
 
-#define SERVICE_UUID "181A"
+#define ENV_SENSING_UUID "181A"
 #define TEMPERATURE_UUID "2A1C"
 #define WIND_SPEED_UUID "2A72"
 #define WIND_DIRECTION_UUID "2A73"
 #define HUMIDITY_UUID "2A6F"
 #define PRESSURE_UUID "2A6D"
+
+#define LOC_NAV_UUID "1819"
+#define LATITUDE_UUID "2AAE"
+#define LOC_SPEED_UUID "2A67"
 
 
 // BLE characteristics
@@ -30,8 +34,12 @@ BLECharacteristic windspeedCharacteristic(WIND_SPEED_UUID,
                                           BLECharacteristic::PROPERTY_NOTIFY |
                                               BLECharacteristic::PROPERTY_READ);
 BLECharacteristic windDirectionCharacteristic(WIND_DIRECTION_UUID,
-BLECharacteristic::PROPERTY_NOTIFY |
+                                          BLECharacteristic::PROPERTY_NOTIFY |
                                               BLECharacteristic::PROPERTY_READ);
+BLECharacteristic locationCharacteristic(LATITUDE_UUID,
+                                          BLECharacteristic::PROPERTY_NOTIFY |
+                                              BLECharacteristic::PROPERTY_READ);
+
 
 void bleSendTemperature(const SensorData& data, const Settings& settings) {
   // Send the temperature
@@ -44,8 +52,6 @@ void bleSendTemperature(const SensorData& data, const Settings& settings) {
   memcpy(&buf[1], &temperature, 4);
   temperatureCharacteristic.setValue(buf, sizeof(buf));
   temperatureCharacteristic.notify();
-
-  Serial.println(temperature);
 }
 
 void bleSendHumidity(const SensorData& data) {
@@ -70,6 +76,21 @@ void bleSendWindDirection(const SensorData &data) {
   uint16_t windDirection = round(data.windDirection * 100.0);
   windDirectionCharacteristic.setValue((uint8_t*)&windDirection, 2);
   windDirectionCharacteristic.notify();
+}
+
+void bleSendGPSData(const SensorData &data) {
+  int lat = round(50 * 10000000.0);
+  locationCharacteristic.setValue((uint8_t*)&lat, 4);
+  locationCharacteristic.notify();
+  // int32_t lat = 35;
+  // int32_t lon = 35;
+  // uint8_t buf[10];
+  // buf[0] = 0x04;
+  // buf[1] = 0x00;
+  // memcpy(&buf[2], &lat, 4);
+  // memcpy(&buf[6], &lon, 4);
+  // locationCharacteristic.setValue(buf, sizeof(buf));
+  // locationCharacteristic.notify();
 }
 
 #endif /* F6837E0A_A91C_4BFE_9070_93D920E5CE82 */

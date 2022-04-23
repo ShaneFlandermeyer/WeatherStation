@@ -90,21 +90,27 @@ void setup() {
   BLEDevice::init("Portable Weather Station");
   BLEServer *server = BLEDevice::createServer();
   server->setCallbacks(new WeatherStationCallbacks());
-  BLEService *service = server->createService(SERVICE_UUID);
+  BLEService *env_service = server->createService(ENV_SENSING_UUID);
+  BLEService *loc_service = server->createService(LOC_NAV_UUID);
 
-  // Temperature
-  service->addCharacteristic(&temperatureCharacteristic);
-  service->addCharacteristic(&humidityCharacteristic);
-  service->addCharacteristic(&pressureCharacteristic);
-  service->addCharacteristic(&windspeedCharacteristic);
-  service->addCharacteristic(&windDirectionCharacteristic);
+  // Environmental sensing
+  env_service->addCharacteristic(&temperatureCharacteristic);
+  env_service->addCharacteristic(&humidityCharacteristic);
+  env_service->addCharacteristic(&pressureCharacteristic);
+  env_service->addCharacteristic(&windspeedCharacteristic);
+  env_service->addCharacteristic(&windDirectionCharacteristic);
+
+  // Location and navigation
+  loc_service->addCharacteristic(&locationCharacteristic);
 
   // Start the service
-  service->start();
+  env_service->start();
+  loc_service->start();
 
   // Start advertising
   BLEAdvertising *advertising = BLEDevice::getAdvertising();
-  advertising->addServiceUUID(SERVICE_UUID);
+  advertising->addServiceUUID(ENV_SENSING_UUID);
+  advertising->addServiceUUID(LOC_NAV_UUID);
   advertising->setScanResponse(true);
   advertising->setMinPreferred(
       0x06);  // functions that help with iPhone connections issue
@@ -141,6 +147,7 @@ void loop() {
       bleSendPressure(data);
       bleSendWindSpeed(data);
       bleSendWindDirection(data);
+      bleSendGPSData(data);
     }
   }
 
