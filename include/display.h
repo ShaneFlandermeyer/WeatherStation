@@ -315,102 +315,60 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
         substate = substate % 5;
         tft.setTextColor(ILI9341_WHITE);
         tft.setTextSize(2);
+        tft.setCursor(15, 60);
+        tft.print("TEMPERATURE UNIT: ");
+        tft.setCursor(240, 60);
+        tft.print(settings.temperatureUnit == FAHRENHEIT ? "F" : "C");
+        tft.setCursor(15, 80);
+        tft.print("DISPLAY UPDATE: ");
+        tft.setCursor(240, 80);
+        tft.print(settings.intervals[settings.displayUpdateIntervalIndex]);
+        tft.print(" s");
+        tft.setCursor(15, 100);
+        tft.print("DATA UPDATE: ");
+        tft.setCursor(240, 100);
+        tft.print(settings.intervals[settings.dataUpdateIntervalIndex]);
+        tft.print(" s");
+        tft.setCursor(15, 120);
+        tft.print("OLED SCREEN: ");
+        tft.setCursor(240, 120);
+        tft.print(settings.useOled ? "ON" : "OFF");
+        tft.setCursor(205, 195);
+        tft.print("<<<");
+        tft.setTextColor(ILI9341_GREEN);
+
         switch (substate) {
           case 0:  // Temperature unit field selected
-            tft.setCursor(15, 80);
-            tft.print("DISPLAY UPDATE: ");
-            tft.print(settings.intervals[settings.displayUpdateIntervalIndex]);
-            tft.println(" s");
-            tft.setCursor(15, 100);
-            tft.print("DATA UPDATE: ");
-            tft.print(settings.intervals[settings.dataUpdateIntervalIndex]);
-            tft.println(" s");
-            tft.setCursor(15, 120);
-            tft.print("OLED SCREEN: ");
-            tft.println(settings.useOled ? "ON" : "OFF");
-            tft.setCursor(205, 195);
-            tft.println("<<<");
-            tft.setTextColor(ILI9341_GREEN);
             tft.setCursor(15, 60);
             tft.print("TEMPERATURE UNIT: ");
+            tft.setCursor(240, 60);
             tft.println(settings.temperatureUnit == FAHRENHEIT ? "F" : "C");
             break;
 
           case 1:  // Display update interval field selected
-            tft.setCursor(15, 60);
-            tft.print("TEMPERATURE UNIT: ");
-            tft.println(settings.temperatureUnit == FAHRENHEIT ? "F" : "C");
-            tft.setCursor(15, 100);
-            tft.print("DATA UPDATE: ");
-            tft.print(settings.intervals[settings.dataUpdateIntervalIndex]);
-            tft.println(" s");
-            tft.setCursor(15, 120);
-            tft.print("OLED SCREEN: ");
-            tft.println(settings.useOled ? "ON" : "OFF");
-            tft.setCursor(205, 195);
-            tft.println("<<<");
-            tft.setTextColor(ILI9341_GREEN);
             tft.setCursor(15, 80);
             tft.print("DISPLAY UPDATE: ");
+            tft.setCursor(240, 80);
             tft.print(settings.intervals[settings.displayUpdateIntervalIndex]);
             tft.println(" s");
             break;
 
           case 2:  // Data update interval field selected
-            tft.setCursor(15, 60);
-            tft.print("TEMPERATURE UNIT: ");
-            tft.println(settings.temperatureUnit == FAHRENHEIT ? "F" : "C");
-            tft.setCursor(15, 80);
-            tft.print("DISPLAY UPDATE: ");
-            tft.print(settings.intervals[settings.displayUpdateIntervalIndex]);
-            tft.println(" s");
-            tft.setCursor(15, 120);
-            tft.print("OLED SCREEN: ");
-            tft.println(settings.useOled ? "ON" : "OFF");
-            tft.setCursor(205, 195);
-            tft.println("<<<");
-            tft.setTextColor(ILI9341_GREEN);
             tft.setCursor(15, 100);
             tft.print("DATA UPDATE: ");
+            tft.setCursor(240, 100);
             tft.print(settings.intervals[settings.dataUpdateIntervalIndex]);
             tft.println(" s");
             break;
 
           case 3:  // OLED screen field selected
-            tft.setCursor(15, 60);
-            tft.print("TEMPERATURE UNIT: ");
-            tft.println(settings.temperatureUnit == FAHRENHEIT ? "F" : "C");
-            tft.setCursor(15, 80);
-            tft.print("DISPLAY UPDATE: ");
-            tft.print(settings.intervals[settings.displayUpdateIntervalIndex]);
-            tft.println(" s");
-            tft.setCursor(15, 100);
-            tft.print("DATA UPDATE: ");
-            tft.print(settings.intervals[settings.dataUpdateIntervalIndex]);
-            tft.println(" s");
-            tft.setCursor(205, 195);
-            tft.println("<<<");
-            tft.setTextColor(ILI9341_GREEN);
             tft.setCursor(15, 120);
             tft.print("OLED SCREEN: ");
+            tft.setCursor(240, 120);
             tft.println(settings.useOled ? "ON" : "OFF");
             break;
 
           case 4:  // Back button selected
-            tft.setCursor(15, 60);
-            tft.print("TEMPERATURE UNIT: ");
-            tft.println(settings.temperatureUnit == FAHRENHEIT ? "F" : "C");
-            tft.setCursor(15, 80);
-            tft.print("DISPLAY UPDATE: ");
-            tft.print(settings.intervals[settings.displayUpdateIntervalIndex]);
-            tft.println(" s");
-            tft.setCursor(15, 100);
-            tft.print("DATA UPDATE: ");
-            tft.print(settings.intervals[settings.dataUpdateIntervalIndex]);
-            tft.println(" s");
-            tft.setCursor(15, 120);
-            tft.print("OLED SCREEN: ");
-            tft.println(settings.useOled ? "ON" : "OFF");
             tft.setTextColor(ILI9341_GREEN);
             tft.setCursor(205, 195);
             tft.println("<<<");
@@ -422,7 +380,7 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
 
 /**
  * Update display parameters based on button inputs and the current state
- * 
+ *
  */
 void updateDisplayParams() {
   if (useOled) {
@@ -477,22 +435,26 @@ void updateDisplayParams() {
           case 0:  // Temperature unit field selected
             settings.temperatureUnit =
                 (settings.temperatureUnit == FAHRENHEIT) ? CELSIUS : FAHRENHEIT;
+            tft.fillRect(160, 60, 160, 20, ILI9341_BLUE);
             break;
 
           case 1:  // Display update interval field selected
             settings.displayUpdateIntervalIndex =
                 (settings.displayUpdateIntervalIndex + 1) %
                 settings.intervals.size();
+            tft.fillRect(160, 80, 160, 20, ILI9341_BLUE);
             break;
 
           case 2:  // Data update interval field selected
             settings.dataUpdateIntervalIndex =
                 (settings.dataUpdateIntervalIndex + 1) %
                 settings.intervals.size();
+            tft.fillRect(160, 100, 160, 20, ILI9341_BLUE);
             break;
 
           case 3:  // OLED screen field selected
             settings.useOled = !settings.useOled;
+            tft.fillRect(160, 120, 160, 20, ILI9341_BLUE);
             break;
 
           case 4:  // Back button selected
