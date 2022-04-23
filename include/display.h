@@ -159,26 +159,21 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
           // Sensor readings box
           tft.fillRect(20, 50, 130, 50, ILI9341_BLACK);
           tft.drawRect(20, 50, 130, 50, ILI9341_WHITE);
-          // Scan interval box
-          tft.fillRect(170, 50, 130, 50, ILI9341_BLACK);
-          tft.drawRect(170, 50, 130, 50, ILI9341_WHITE);
           // Settings box
           tft.fillRect(20, 110, 130, 50, ILI9341_BLACK);
           tft.drawRect(20, 110, 130, 50, ILI9341_WHITE);
           // Sleep box
-          tft.fillRect(170, 110, 130, 50, ILI9341_BLACK);
-          tft.drawRect(170, 110, 130, 50, ILI9341_WHITE);
+          tft.fillRect(20, 170, 130, 50, ILI9341_BLACK);
+          tft.drawRect(20, 170, 130, 50, ILI9341_WHITE);
         }
-        substate = substate % 4;
+        substate = substate % 3;
         tft.setTextSize(1);
         tft.setTextColor(ILI9341_WHITE);
         switch (substate) {
           case 0:
-            tft.setCursor(195, 70);
-            tft.println("Scan Interval");
-            tft.setCursor(50, 130);
+            tft.setCursor(40, 130);
             tft.println("Settings");
-            tft.setCursor(215, 130);
+            tft.setCursor(40, 190);
             tft.println("Sleep");
             tft.setTextColor(ILI9341_GREEN);
             tft.setCursor(40, 70);
@@ -193,34 +188,19 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
           case 1:
             tft.setCursor(40, 70);
             tft.println("Sensor Readings");
-            tft.setCursor(50, 130);
-            tft.println("Settings");
-            tft.setCursor(215, 130);
+            tft.setCursor(40, 190);
             tft.println("Sleep");
             tft.setTextColor(ILI9341_GREEN);
-            tft.setCursor(195, 70);
-            tft.println("Scan Interval");
+            tft.setCursor(40, 130);
+            tft.println("Settings");
             break;
           case 2:
             tft.setCursor(40, 70);
             tft.println("Sensor Readings");
-            tft.setCursor(195, 70);
-            tft.println("Scan Interval");
-            tft.setCursor(215, 130);
-            tft.println("Sleep");
-            tft.setTextColor(ILI9341_GREEN);
-            tft.setCursor(50, 130);
-            tft.println("Settings");
-            break;
-          case 3:
-            tft.setCursor(40, 70);
-            tft.println("Sensor Readings");
-            tft.setCursor(195, 70);
-            tft.println("Scan Interval");
-            tft.setCursor(50, 130);
+            tft.setCursor(40, 130);
             tft.println("Settings");
             tft.setTextColor(ILI9341_GREEN);
-            tft.setCursor(215, 130);
+            tft.setCursor(40, 190);
             tft.println("Sleep");
             break;
         }
@@ -269,19 +249,6 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
             tft.println(" deg");
             tft.setTextSize(3);
           } else {
-            //     oled.println("Time: " + String(data.hour) + ":" +
-            //     String(data.minute)
-            //     +
-            //                  ":" + String(data.second) + " UTC");
-            //     if (not gps.location.isValid()) {
-            //       oled.println("Connecting...");
-            //     } else {
-            //       oled.println("Latitude: " + String(abs(data.lat)) +
-            //                    (data.lat > 0 ? " N" : " S"));
-            //       oled.println("Longitude: " + String(abs(data.lon)) +
-            //                    (data.lon > 0 ? " E" : " W"));
-            //       oled.println("Altitude: " + String(data.alt) + "m");
-            //       oled.println("Speed: " + String(data.speed) + " mph");
             tft.setCursor(100, 10);
             tft.println("SENSORS");
             tft.setTextSize(2);
