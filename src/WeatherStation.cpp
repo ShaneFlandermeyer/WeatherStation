@@ -17,7 +17,6 @@
 HardwareSerial SerialGPS(2);
 uint64_t dataTimer = millis();
 
-
 // *******************************************************************************
 // * Setup functions
 //   *******************************************************************************
@@ -37,8 +36,7 @@ void setup() {
   // Attach interrupt functions
   attachInterrupt(digitalPinToInterrupt(RIGHT_BUTTON), rightButtonPress,
                   FALLING);
-  attachInterrupt(digitalPinToInterrupt(LEFT_BUTTON), leftbuttonPress,
-                  FALLING);
+  attachInterrupt(digitalPinToInterrupt(LEFT_BUTTON), leftbuttonPress, FALLING);
   attachInterrupt(digitalPinToInterrupt(SELECT_BUTTON), selectButtonPress,
                   FALLING);
   Serial.begin(9600);
@@ -124,7 +122,9 @@ void loop() {
     updateDisplay(oled, tft, data, settings, gps);
   }
 
-  if (settings.useOled and millis() - oledFrameTimer > 5000) {
+  if (settings.useOled and
+      millis() - oledFrameTimer >
+          settings.intervals[settings.oledScrollRateIntervalIndex] * 1000) {
     oledFrameTimer = millis();
     oledState = (oledState + 1) % NUM_OLED_FRAMES;
     updateDisplay(oled, tft, data, settings, gps);

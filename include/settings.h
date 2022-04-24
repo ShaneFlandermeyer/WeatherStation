@@ -11,6 +11,7 @@ struct Settings {
   uint8_t dataUpdateIntervalIndex = 0;
   uint8_t temperatureUnit = FAHRENHEIT;
   bool useOled = true;
+  uint8_t oledScrollRateIntervalIndex = 0;
 };
 
 

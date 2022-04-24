@@ -22,6 +22,7 @@ enum Menus { MAINMENU, SENSORS, SETTINGS, SLEEP, NUM_MENUS };
 uint64_t displayTimer = millis();
 uint64_t oledFrameTimer = millis();
 volatile uint64_t buttonPressTime = 0;
+const int debounceDelay = 200;
 
 uint8_t tftState = 0;
 uint8_t oledState = 0;
@@ -290,7 +291,7 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
         tft.fillRect(180, 180, 120, 50, ILI9341_BLACK);
         tft.drawRect(180, 180, 120, 50, ILI9341_WHITE);
       }
-      substate = substate % 5;
+      substate = substate % 6;
       tft.setTextColor(ILI9341_WHITE);
       tft.setTextSize(2);
       tft.setCursor(15, 60);
@@ -311,6 +312,11 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
       tft.print("OLED SCREEN: ");
       tft.setCursor(240, 120);
       tft.print(settings.useOled ? "ON" : "OFF");
+      tft.setCursor(15, 140);
+      tft.print("OLED SCROLL: ");
+      tft.setCursor(240, 140);
+      tft.print(settings.intervals[settings.oledScrollRateIntervalIndex]);
+      tft.print(" s");
       tft.setCursor(205, 195);
       tft.print("<<<");
       tft.setTextColor(ILI9341_GREEN);
@@ -346,8 +352,15 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
           tft.println(settings.useOled ? "ON" : "OFF");
           break;
 
-        case 4:  // Back button selected
-          tft.setTextColor(ILI9341_GREEN);
+        case 4:
+          tft.setCursor(15, 140);
+          tft.print("OLED SCROLL: ");
+          tft.setCursor(240, 140);
+          tft.print(settings.intervals[settings.oledScrollRateIntervalIndex]);
+          tft.println(" s");
+          break;
+
+        case 5:  // Back button selected
           tft.setCursor(205, 195);
           tft.println("<<<");
           break;
@@ -445,7 +458,14 @@ void updateDisplayParams() {
           tft.fillRect(160, 120, 160, 20, ILI9341_BLUE);
           break;
 
-        case 4:  // Back button selected
+        case 4:  // OLED scroll rate field selected
+          settings.oledScrollRateIntervalIndex =
+              (settings.oledScrollRateIntervalIndex + 1) %
+              settings.intervals.size();
+          tft.fillRect(160, 140, 160, 20, ILI9341_BLUE);
+          break;
+
+        case 5:  // Back button selected
           substate = 0;
           redraw = true;
           tftState = MAINMENU;
@@ -490,7 +510,7 @@ void handleButtonPress() {
 
 void rightButtonPress() {
   int timeNow = millis();
-  if (timeNow > buttonPressTime + 250) {
+  if (timeNow > buttonPressTime + debounceDelay) {
     rightButtonPressed = true;
     buttonPressTime = timeNow;
   }
@@ -498,7 +518,7 @@ void rightButtonPress() {
 
 void leftbuttonPress() {
   int timeNow = millis();
-  if (timeNow > buttonPressTime + 250) {
+  if (timeNow > buttonPressTime + debounceDelay) {
     leftButtonPressed = true;
     buttonPressTime = timeNow;
   }
@@ -506,7 +526,7 @@ void leftbuttonPress() {
 
 void selectButtonPress() {
   int timeNow = millis();
-  if (timeNow > buttonPressTime + 250) {
+  if (timeNow > buttonPressTime + debounceDelay) {
     selectButtonPressed = true;
     buttonPressTime = timeNow;
   }
