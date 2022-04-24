@@ -1,10 +1,5 @@
-// #include <Adafruit_BME280.h>
-// #include <Adafruit_Sensor.h>
 #include <Arduino.h>
 #include <HardwareSerial.h>
-// #include <SPI.h>
-// #include <TinyGPS++.h>
-// #include <Wire.h>
 #include <SD.h>
 
 #include <sstream>
@@ -35,15 +30,16 @@ class WeatherStationCallbacks : public BLEServerCallbacks {
 
 void setup() {
   // Input handling
-  pinMode(RIGHTBUTTON, INPUT_PULLUP);
-  pinMode(LEFTBUTTON, INPUT_PULLUP);
-  pinMode(SELECTBUTTON, INPUT_PULLUP);
+  pinMode(RIGHT_BUTTON, INPUT_PULLUP);
+  pinMode(LEFT_BUTTON, INPUT_PULLUP);
+  pinMode(SELECT_BUTTON, INPUT_PULLUP);
+  pinMode(TFT_CS, OUTPUT);
   // Attach interrupt functions
-  attachInterrupt(digitalPinToInterrupt(RIGHTBUTTON), rightButtonPressed,
+  attachInterrupt(digitalPinToInterrupt(RIGHT_BUTTON), rightButtonPress,
                   FALLING);
-  attachInterrupt(digitalPinToInterrupt(LEFTBUTTON), leftbuttonPressed,
+  attachInterrupt(digitalPinToInterrupt(LEFT_BUTTON), leftbuttonPress,
                   FALLING);
-  attachInterrupt(digitalPinToInterrupt(SELECTBUTTON), selectButtonPressed,
+  attachInterrupt(digitalPinToInterrupt(SELECT_BUTTON), selectButtonPress,
                   FALLING);
   Serial.begin(9600);
   // Wait for USB Serial
@@ -53,9 +49,7 @@ void setup() {
 
   // Start all devices
   init_tft();
-  if (useOled) {
-    init_oled();
-  }
+  init_oled();
   bme.begin();
   BLEDevice::init("Portable Weather Station");
   BLEServer *server = BLEDevice::createServer();
@@ -127,12 +121,12 @@ void loop() {
   if (millis() - displayTimer >
       settings.intervals[settings.displayUpdateIntervalIndex] * 1000) {
     displayTimer = millis();
-    updateDisplay(oled, tft, data, settings, gps, tftState);
+    updateDisplay(oled, tft, data, settings, gps);
   }
 
-//   if (millis() - frameTimer > 5000) {
-//     frameTimer = millis();
-//     frame = (frame + 1) % numFrames;
-//     updateDisplay(oled, tft, data, settings, gps, tftState);
-//   }
+  if (millis() - oledFrameTimer > 5000) {
+    oledFrameTimer = millis();
+    oledState = (oledState + 1) % NUM_OLED_FRAMES;
+    updateDisplay(oled, tft, data, settings, gps);
+  }
 }

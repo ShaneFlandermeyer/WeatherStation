@@ -120,7 +120,7 @@ float readWindSpeed() {
 
 float readWindDirection() {
   // Convert the voltage to an angle
-  return analogRead(WINDDIRECTION) * ADC_TO_VOLTAGE / 5 * 359;
+  return analogRead(WIND_DIRECTION) * ADC_TO_VOLTAGE / 5 * 359;
 }
 
 /**

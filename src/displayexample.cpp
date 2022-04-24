@@ -5,15 +5,15 @@
 
 // void setup() {
 //   // Input handling
-//   pinMode(RIGHTBUTTON, INPUT_PULLUP);
-//   pinMode(LEFTBUTTON, INPUT_PULLUP);
-//   pinMode(SELECTBUTTON, INPUT_PULLUP);
+//   pinMode(RIGHT_BUTTON, INPUT_PULLUP);
+//   pinMode(LEFT_BUTTON, INPUT_PULLUP);
+//   pinMode(SELECT_BUTTON, INPUT_PULLUP);
 //   // Attach interrupt functions
-//   attachInterrupt(digitalPinToInterrupt(RIGHTBUTTON), rightButtonPressed,
+//   attachInterrupt(digitalPinToInterrupt(RIGHT_BUTTON), rightButtonPressed,
 //                   FALLING);
-//   attachInterrupt(digitalPinToInterrupt(LEFTBUTTON), leftbuttonPressed,
+//   attachInterrupt(digitalPinToInterrupt(LEFT_BUTTON), leftbuttonPressed,
 //                   FALLING);
-//   attachInterrupt(digitalPinToInterrupt(SELECTBUTTON), selectButtonPressed,
+//   attachInterrupt(digitalPinToInterrupt(SELECT_BUTTON), selectButtonPressed,
 //                   FALLING);
 //   Serial.begin(9600);
 //   // Wait for USB Serial

@@ -13,16 +13,18 @@
 
 void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
                    const SensorData &data, Settings &settings,
-                   const TinyGPSPlus &gps, int frame);
+                   const TinyGPSPlus &gps);
 
 // OLED display frames
-// enum Frames { SENSORS = 0, GPSDATA = 1, SETTINGS = 2 };
+enum Frames { SENSORDATA, GPSDATA, NUM_OLED_FRAMES };
 enum Menus { MAINMENU, SENSORS, SETTINGS, NUM_MENUS };
 
 uint64_t displayTimer = millis();
+uint64_t oledFrameTimer = millis();
 volatile uint64_t buttonPressTime = 0;
 
 uint8_t tftState = 0;
+uint8_t oledState = 0;
 uint8_t substate = 0;
 uint8_t sensorScreenPos = 0;
 bool redraw = true;
@@ -31,10 +33,10 @@ Settings settings;
 Adafruit_SSD1306 oled(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RST);
 Adafruit_ILI9341 tft(TFT_CS, TFT_DC, TFT_RST);
 
-bool useOled = true;
-volatile bool isRightButtonPressed = false;
-volatile bool isLeftButtonPressed = false;
-volatile bool isSelectButtonPressed = false;
+// bool useOled = true;
+volatile bool rightButtonPressed = false;
+volatile bool leftButtonPressed = false;
+volatile bool selectButtonPressed = false;
 
 /**
     Set up the OLED display
@@ -49,6 +51,9 @@ void init_oled() {
   oled.clearDisplay();
   oled.display();
   oled.setTextColor(WHITE);
+  if (not settings.useOled) {
+    oled.ssd1306_command(SSD1306_DISPLAYOFF);
+  }
 }
 
 /**
@@ -60,7 +65,7 @@ void init_tft() {
   tft.begin();
   tft.setRotation(3);
   if (tft.readcommand8(ILI9341_RDMODE)) {
-    useOled = false;
+    settings.useOled = false;
   } else {
     Serial.println("TFT not connected");
   }
@@ -78,306 +83,277 @@ void init_tft() {
 */
 void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
                    const SensorData &data, Settings &settings,
-                   const TinyGPSPlus &gps, int state) {
-  if (useOled) {
-    // oled.clearDisplay();
-    // oled.setCursor(0, 0);
-    // switch (state) {
-    //   case SENSORS: {  // Display sensor data
-    //     oled.setTextSize(2);
-    //     oled.println("Sensors");
-    //     oled.setTextSize(1);
-    //     oled.print("Temperature: ");
-    //     oled.print(data.temperature);
-    //     oled.println(settings.temperatureUnit == FAHRENHEIT ? " F" : " C");
-    //     oled.println("Humidity: " + String((int)data.humidity) + "%");
-    //     oled.println("Pressure: " + String(data.pressure) + " hPa");
-    //     oled.println("Wind speed: " + String(data.windSpeed) + " mph");
-    //     oled.display();
-    //   } break;
+                   const TinyGPSPlus &gps) {
+  if (settings.useOled) {
+    oled.clearDisplay();
+    oled.setCursor(0, 0);
+    switch (oledState) {
+      case SENSORDATA: {  // Display sensor data
+        oled.setTextSize(2);
+        oled.println("Sensors");
+        oled.setTextSize(1);
+        oled.print("Temperature: ");
+        oled.print(data.temperature);
+        oled.println(settings.temperatureUnit == FAHRENHEIT ? " F" : " C");
+        oled.println("Humidity: " + String((int)data.humidity) + "%");
+        oled.println("Pressure: " + String(data.pressure) + " hPa");
+        oled.println("Wind speed: " + String(data.windSpeed) + " mph");
+        oled.display();
+      } break;
 
-    //   case GPSDATA: {  // Display GPS data
-    //     oled.setTextSize(2);
-    //     oled.println("GPS Data");
-    //     oled.setTextSize(1);
+      case GPSDATA: {  // Display GPS data
+        oled.setTextSize(2);
+        oled.println("GPS Data");
+        oled.setTextSize(1);
 
-    //     oled.println("Time: " + String(data.hour) + ":" + String(data.minute)
-    //     +
-    //                  ":" + String(data.second) + " UTC");
-    //     if (not gps.location.isValid()) {
-    //       oled.println("Connecting...");
-    //     } else {
-    //       oled.println("Latitude: " + String(abs(data.lat)) +
-    //                    (data.lat > 0 ? " N" : " S"));
-    //       oled.println("Longitude: " + String(abs(data.lon)) +
-    //                    (data.lon > 0 ? " E" : " W"));
-    //       oled.println("Altitude: " + String(data.alt) + "m");
-    //       oled.println("Speed: " + String(data.speed) + " mph");
-    //     }
-
-    //   } break;
-
-    // case SETTINGS: {  // Display the settings tab
-    //   int vpos = 0;
-    //   oled.setTextSize(2);
-    //   oled.println("Settings");
-    //   vpos += 16;
-    //   oled.setTextSize(1);
-    //   oled.setCursor(10, vpos);
-    //   oled.println(
-    //       "Disp. Rate: " +
-    //       String(settings.intervals[settings.displayUpdateIntervalIndex]) +
-    //       " s");
-    //   vpos += 10;
-    //   oled.setCursor(10, vpos);
-    //   oled.println(
-    //       "Data Rate: " +
-    //       String(settings.intervals[settings.dataUpdateIntervalIndex]) +
-    //       " s");
-    //   vpos += 10;
-    //   oled.setCursor(10, vpos);
-    //   oled.println(
-    //       "Temp. Unit: " +
-    //       String(settings.temperatureUnit == FAHRENHEIT ? "F" : "C"));
-    //   vpos += 10;
-    //   oled.setCursor(0, 16 + 10 * line);
-    //   oled.print("> ");
-
-    // } break;
-    // default:
-    //   break;
-    // }
-    // oled.display();
-  } else {
-    switch (state) {
-      case MAINMENU:
-        if (redraw) {
-          redraw = false;
-          tft.fillScreen(ILI9341_BLUE);
-          tft.setTextSize(3);
-          tft.setCursor(80, 10);
-          tft.setTextColor(ILI9341_WHITE);
-          tft.println("MAIN MENU");
-          // Sensor readings box
-          tft.fillRect(20, 50, 240, 50, ILI9341_BLACK);
-          tft.drawRect(20, 50, 240, 50, ILI9341_WHITE);
-          // Settings box
-          tft.fillRect(20, 110, 240, 50, ILI9341_BLACK);
-          tft.drawRect(20, 110, 240, 50, ILI9341_WHITE);
-          // Sleep box
-          tft.fillRect(20, 170, 240, 50, ILI9341_BLACK);
-          tft.drawRect(20, 170, 240, 50, ILI9341_WHITE);
-        }
-        substate = substate % 3;
-        tft.setTextSize(2);
-        tft.setTextColor(ILI9341_WHITE);
-        switch (substate) {
-          case 0:
-            tft.setCursor(40, 130);
-            tft.println("Settings");
-            tft.setCursor(40, 190);
-            tft.println("Sleep");
-            tft.setTextColor(ILI9341_GREEN);
-            tft.setCursor(40, 70);
-            tft.println("Sensor Readings");
-            break;
-          case 1:
-            tft.setCursor(40, 70);
-            tft.println("Sensor Readings");
-            tft.setCursor(40, 190);
-            tft.println("Sleep");
-            tft.setTextColor(ILI9341_GREEN);
-            tft.setCursor(40, 130);
-            tft.println("Settings");
-            break;
-          case 2:
-            tft.setCursor(40, 70);
-            tft.println("Sensor Readings");
-            tft.setCursor(40, 130);
-            tft.println("Settings");
-            tft.setTextColor(ILI9341_GREEN);
-            tft.setCursor(40, 190);
-            tft.println("Sleep");
-            break;
-        }
-        break;
-
-      case SENSORS:
-        tft.setTextColor(ILI9341_WHITE);
-        if (redraw) {
-          redraw = false;
-          tft.fillScreen(ILI9341_BLUE);
-          // tft.setTextColor(ILI9341_WHITE);
-          tft.setTextSize(3);
-          tft.fillRect(90, 6, 145, 30, ILI9341_BLACK);
-          tft.drawRect(90, 6, 145, 30, ILI9341_WHITE);
-          // Down button
-          tft.fillRect(20, 180, 60, 50, ILI9341_BLACK);
-          tft.drawRect(20, 180, 60, 50, ILI9341_WHITE);
-          // Up button
-          tft.fillRect(90, 180, 60, 50, ILI9341_BLACK);
-          tft.drawRect(90, 180, 60, 50, ILI9341_WHITE);
-          // Back button
-          tft.fillRect(180, 180, 120, 50, ILI9341_BLACK);
-          tft.drawRect(180, 180, 120, 50, ILI9341_WHITE);
-          tft.setCursor(100, 10);
-          tft.println("SENSORS");
-        }
-        tft.setTextSize(2);
-        if (sensorScreenPos == 0) {
-          tft.fillRect(160, 60, 160, 120, ILI9341_BLUE);
-          tft.setCursor(15, 60);
-          tft.print("TEMPERATURE: ");
-          tft.setCursor(160, 60);
-          tft.print(String((int)data.temperature % 100) +
-                    (settings.temperatureUnit == FAHRENHEIT ? "F" : "C"));
-          tft.setCursor(15, 80);
-          tft.print("HUMIDITY: ");
-          tft.setCursor(160, 80);
-          tft.print(String(100) + " %");
-          tft.setCursor(15, 100);
-          tft.print("UV INDEX: ");
-          // TODO: Average UV sensor readings
-          tft.setCursor(160, 100);
-          tft.print(1337);
-          tft.setCursor(15, 120);
-          tft.print("WIND SPEED: ");
-          tft.setCursor(160, 120);
-          tft.print(String(data.windSpeed) + " mph");
-          tft.setCursor(15, 140);
-          tft.print("WIND DIR.: ");
-          tft.setCursor(160, 140);
-          tft.print(String(data.windDirection) + " deg");
+        oled.println("Time: " + String(data.hour) + ":" + String(data.minute) +
+                     ":" + String(data.second) + " UTC");
+        if (not gps.location.isValid()) {
+          oled.println("Connecting...");
         } else {
-          tft.setCursor(15, 60);
-          tft.print("TIME: ");
-          tft.println(String(data.hour) + ":" + String(data.minute) + ":" +
-                      String(data.second) + " UTC");
-          if (not gps.location.isValid()) {
-            tft.println("Connecting...");
-          } else {
-            tft.setCursor(15, 80);
-            tft.println("LATITUDE: " + String(abs(data.lat)) +
-                        (data.lat > 0 ? " N" : " S"));
-            tft.setCursor(15, 100);
-            tft.println("Longitude: " + String(abs(data.lon)) +
-                        (data.lon > 0 ? " E" : " W"));
-            tft.setCursor(15, 120);
-            tft.println("Altitude: " + String(data.alt) + " m");
-            tft.setCursor(15, 140);
-            tft.println("Speed: " + String(data.speed) + " mph");
-          }
+          oled.println("Latitude: " + String(abs(data.lat)) +
+                       (data.lat > 0 ? " N" : " S"));
+          oled.println("Longitude: " + String(abs(data.lon)) +
+                       (data.lon > 0 ? " E" : " W"));
+          oled.println("Altitude: " + String(data.alt) + "m");
+          oled.println("Speed: " + String(data.speed) + " mph");
         }
-        substate = substate % 3;
-        switch (substate) {
-          case 0:
-            // Highlight the buttons
-            tft.setCursor(105, 195);
-            tft.println("->");
-            tft.setCursor(205, 195);
-            tft.println("<<<");
-            tft.setTextColor(ILI9341_GREEN);
-            tft.setCursor(35, 195);
-            tft.println("<-");
-            // Select button pressed
-            break;
-          case 1:
-            tft.setCursor(35, 195);
-            tft.println("<-");
-            tft.setCursor(205, 195);
-            tft.println("<<<");
-            tft.setTextColor(ILI9341_GREEN);
-            tft.setCursor(105, 195);
-            tft.println("->");
-            break;
-          case 2:
-            tft.setCursor(35, 195);
-            tft.println("<-");
-            tft.setCursor(105, 195);
-            tft.println("->");
-            tft.setTextColor(ILI9341_GREEN);
-            tft.setCursor(205, 195);
-            tft.println("<<<");
-            break;
-        }
+
+      } break;
+      default:
         break;
-
-      case SETTINGS:
-        if (redraw) {
-          redraw = false;
-          tft.fillScreen(ILI9341_BLUE);
-          tft.setTextColor(ILI9341_WHITE);
-          tft.setTextSize(3);
-          tft.setCursor(100, 10);
-          tft.println("SETTINGS");
-          // Back button
-          tft.fillRect(180, 180, 120, 50, ILI9341_BLACK);
-          tft.drawRect(180, 180, 120, 50, ILI9341_WHITE);
-        }
-        substate = substate % 5;
-        tft.setTextColor(ILI9341_WHITE);
-        tft.setTextSize(2);
-        tft.setCursor(15, 60);
-        tft.print("TEMPERATURE UNIT: ");
-        tft.setCursor(240, 60);
-        tft.print(settings.temperatureUnit == FAHRENHEIT ? "F" : "C");
-        tft.setCursor(15, 80);
-        tft.print("DISPLAY UPDATE: ");
-        tft.setCursor(240, 80);
-        tft.print(settings.intervals[settings.displayUpdateIntervalIndex]);
-        tft.print(" s");
-        tft.setCursor(15, 100);
-        tft.print("DATA UPDATE: ");
-        tft.setCursor(240, 100);
-        tft.print(settings.intervals[settings.dataUpdateIntervalIndex]);
-        tft.print(" s");
-        tft.setCursor(15, 120);
-        tft.print("OLED SCREEN: ");
-        tft.setCursor(240, 120);
-        tft.print(settings.useOled ? "ON" : "OFF");
-        tft.setCursor(205, 195);
-        tft.print("<<<");
-        tft.setTextColor(ILI9341_GREEN);
-
-        switch (substate) {
-          case 0:  // Temperature unit field selected
-            tft.setCursor(15, 60);
-            tft.print("TEMPERATURE UNIT: ");
-            tft.setCursor(240, 60);
-            tft.println(settings.temperatureUnit == FAHRENHEIT ? "F" : "C");
-            break;
-
-          case 1:  // Display update interval field selected
-            tft.setCursor(15, 80);
-            tft.print("DISPLAY UPDATE: ");
-            tft.setCursor(240, 80);
-            tft.print(settings.intervals[settings.displayUpdateIntervalIndex]);
-            tft.println(" s");
-            break;
-
-          case 2:  // Data update interval field selected
-            tft.setCursor(15, 100);
-            tft.print("DATA UPDATE: ");
-            tft.setCursor(240, 100);
-            tft.print(settings.intervals[settings.dataUpdateIntervalIndex]);
-            tft.println(" s");
-            break;
-
-          case 3:  // OLED screen field selected
-            tft.setCursor(15, 120);
-            tft.print("OLED SCREEN: ");
-            tft.setCursor(240, 120);
-            tft.println(settings.useOled ? "ON" : "OFF");
-            break;
-
-          case 4:  // Back button selected
-            tft.setTextColor(ILI9341_GREEN);
-            tft.setCursor(205, 195);
-            tft.println("<<<");
-            break;
-        }
     }
+    oled.display();
+  }  // else {
+  switch (tftState) {
+    case MAINMENU:
+      if (redraw) {
+        redraw = false;
+        tft.fillScreen(ILI9341_BLUE);
+        tft.setTextSize(3);
+        tft.setCursor(80, 10);
+        tft.setTextColor(ILI9341_WHITE);
+        tft.println("MAIN MENU");
+        // Sensor readings box
+        tft.fillRect(20, 50, 240, 50, ILI9341_BLACK);
+        tft.drawRect(20, 50, 240, 50, ILI9341_WHITE);
+        // Settings box
+        tft.fillRect(20, 110, 240, 50, ILI9341_BLACK);
+        tft.drawRect(20, 110, 240, 50, ILI9341_WHITE);
+        // Sleep box
+        tft.fillRect(20, 170, 240, 50, ILI9341_BLACK);
+        tft.drawRect(20, 170, 240, 50, ILI9341_WHITE);
+      }
+      substate = substate % 3;
+      tft.setTextSize(2);
+      tft.setTextColor(ILI9341_WHITE);
+      switch (substate) {
+        case 0:
+          tft.setCursor(40, 130);
+          tft.println("Settings");
+          tft.setCursor(40, 190);
+          tft.println("Sleep");
+          tft.setTextColor(ILI9341_GREEN);
+          tft.setCursor(40, 70);
+          tft.println("Sensor Readings");
+          break;
+        case 1:
+          tft.setCursor(40, 70);
+          tft.println("Sensor Readings");
+          tft.setCursor(40, 190);
+          tft.println("Sleep");
+          tft.setTextColor(ILI9341_GREEN);
+          tft.setCursor(40, 130);
+          tft.println("Settings");
+          break;
+        case 2:
+          tft.setCursor(40, 70);
+          tft.println("Sensor Readings");
+          tft.setCursor(40, 130);
+          tft.println("Settings");
+          tft.setTextColor(ILI9341_GREEN);
+          tft.setCursor(40, 190);
+          tft.println("Sleep");
+          break;
+      }
+      break;
+
+    case SENSORS:
+      tft.setTextColor(ILI9341_WHITE);
+      if (redraw) {
+        redraw = false;
+        tft.fillScreen(ILI9341_BLUE);
+        // tft.setTextColor(ILI9341_WHITE);
+        tft.setTextSize(3);
+        tft.fillRect(90, 6, 145, 30, ILI9341_BLACK);
+        tft.drawRect(90, 6, 145, 30, ILI9341_WHITE);
+        // Down button
+        tft.fillRect(20, 180, 60, 50, ILI9341_BLACK);
+        tft.drawRect(20, 180, 60, 50, ILI9341_WHITE);
+        // Up button
+        tft.fillRect(90, 180, 60, 50, ILI9341_BLACK);
+        tft.drawRect(90, 180, 60, 50, ILI9341_WHITE);
+        // Back button
+        tft.fillRect(180, 180, 120, 50, ILI9341_BLACK);
+        tft.drawRect(180, 180, 120, 50, ILI9341_WHITE);
+        tft.setCursor(100, 10);
+        tft.println("SENSORS");
+      }
+      tft.setTextSize(2);
+      if (sensorScreenPos == 0) {
+        tft.fillRect(160, 60, 160, 120, ILI9341_BLUE);
+        tft.setCursor(15, 60);
+        tft.print("TEMPERATURE: ");
+        tft.setCursor(160, 60);
+        tft.print(String((int)data.temperature % 100) +
+                  (settings.temperatureUnit == FAHRENHEIT ? "F" : "C"));
+        tft.setCursor(15, 80);
+        tft.print("HUMIDITY: ");
+        tft.setCursor(160, 80);
+        tft.print(String(100) + " %");
+        tft.setCursor(15, 100);
+        tft.print("UV INDEX: ");
+        // TODO: Average UV sensor readings
+        tft.setCursor(160, 100);
+        tft.print(1337);
+        tft.setCursor(15, 120);
+        tft.print("WIND SPEED: ");
+        tft.setCursor(160, 120);
+        tft.print(String(data.windSpeed) + " mph");
+        tft.setCursor(15, 140);
+        tft.print("WIND DIR.: ");
+        tft.setCursor(160, 140);
+        tft.print(String(data.windDirection) + " deg");
+      } else {
+        tft.setCursor(15, 60);
+        tft.print("TIME: ");
+        tft.println(String(data.hour) + ":" + String(data.minute) + ":" +
+                    String(data.second) + " UTC");
+        if (not gps.location.isValid()) {
+          tft.println("Connecting...");
+        } else {
+          tft.setCursor(15, 80);
+          tft.println("LATITUDE: " + String(abs(data.lat)) +
+                      (data.lat > 0 ? " N" : " S"));
+          tft.setCursor(15, 100);
+          tft.println("Longitude: " + String(abs(data.lon)) +
+                      (data.lon > 0 ? " E" : " W"));
+          tft.setCursor(15, 120);
+          tft.println("Altitude: " + String(data.alt) + " m");
+          tft.setCursor(15, 140);
+          tft.println("Speed: " + String(data.speed) + " mph");
+        }
+      }
+      substate = substate % 3;
+      switch (substate) {
+        case 0:
+          // Highlight the buttons
+          tft.setCursor(105, 195);
+          tft.println("->");
+          tft.setCursor(205, 195);
+          tft.println("<<<");
+          tft.setTextColor(ILI9341_GREEN);
+          tft.setCursor(35, 195);
+          tft.println("<-");
+          // Select button pressed
+          break;
+        case 1:
+          tft.setCursor(35, 195);
+          tft.println("<-");
+          tft.setCursor(205, 195);
+          tft.println("<<<");
+          tft.setTextColor(ILI9341_GREEN);
+          tft.setCursor(105, 195);
+          tft.println("->");
+          break;
+        case 2:
+          tft.setCursor(35, 195);
+          tft.println("<-");
+          tft.setCursor(105, 195);
+          tft.println("->");
+          tft.setTextColor(ILI9341_GREEN);
+          tft.setCursor(205, 195);
+          tft.println("<<<");
+          break;
+      }
+      break;
+
+    case SETTINGS:
+      if (redraw) {
+        redraw = false;
+        tft.fillScreen(ILI9341_BLUE);
+        tft.setTextColor(ILI9341_WHITE);
+        tft.setTextSize(3);
+        tft.setCursor(100, 10);
+        tft.println("SETTINGS");
+        // Back button
+        tft.fillRect(180, 180, 120, 50, ILI9341_BLACK);
+        tft.drawRect(180, 180, 120, 50, ILI9341_WHITE);
+      }
+      substate = substate % 5;
+      tft.setTextColor(ILI9341_WHITE);
+      tft.setTextSize(2);
+      tft.setCursor(15, 60);
+      tft.print("TEMPERATURE UNIT: ");
+      tft.setCursor(240, 60);
+      tft.print(settings.temperatureUnit == FAHRENHEIT ? "F" : "C");
+      tft.setCursor(15, 80);
+      tft.print("DISPLAY UPDATE: ");
+      tft.setCursor(240, 80);
+      tft.print(settings.intervals[settings.displayUpdateIntervalIndex]);
+      tft.print(" s");
+      tft.setCursor(15, 100);
+      tft.print("DATA UPDATE: ");
+      tft.setCursor(240, 100);
+      tft.print(settings.intervals[settings.dataUpdateIntervalIndex]);
+      tft.print(" s");
+      tft.setCursor(15, 120);
+      tft.print("OLED SCREEN: ");
+      tft.setCursor(240, 120);
+      tft.print(settings.useOled ? "ON" : "OFF");
+      tft.setCursor(205, 195);
+      tft.print("<<<");
+      tft.setTextColor(ILI9341_GREEN);
+
+      switch (substate) {
+        case 0:  // Temperature unit field selected
+          tft.setCursor(15, 60);
+          tft.print("TEMPERATURE UNIT: ");
+          tft.setCursor(240, 60);
+          tft.println(settings.temperatureUnit == FAHRENHEIT ? "F" : "C");
+          break;
+
+        case 1:  // Display update interval field selected
+          tft.setCursor(15, 80);
+          tft.print("DISPLAY UPDATE: ");
+          tft.setCursor(240, 80);
+          tft.print(settings.intervals[settings.displayUpdateIntervalIndex]);
+          tft.println(" s");
+          break;
+
+        case 2:  // Data update interval field selected
+          tft.setCursor(15, 100);
+          tft.print("DATA UPDATE: ");
+          tft.setCursor(240, 100);
+          tft.print(settings.intervals[settings.dataUpdateIntervalIndex]);
+          tft.println(" s");
+          break;
+
+        case 3:  // OLED screen field selected
+          tft.setCursor(15, 120);
+          tft.print("OLED SCREEN: ");
+          tft.setCursor(240, 120);
+          tft.println(settings.useOled ? "ON" : "OFF");
+          break;
+
+        case 4:  // Back button selected
+          tft.setTextColor(ILI9341_GREEN);
+          tft.setCursor(205, 195);
+          tft.println("<<<");
+          break;
+      }
   }
+  // }
 }
 
 /**
@@ -385,87 +361,91 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
  *
  */
 void updateDisplayParams() {
-  if (useOled) {
-  } else {
-    switch (tftState) {
-      case MAINMENU:
-        substate = substate % 3;
-        switch (substate) {
-          case 0:
-            tftState = SENSORS;
+  // if (settings.useOled) {
+  // } else {
+  switch (tftState) {
+    case MAINMENU:
+      substate = substate % 3;
+      switch (substate) {
+        case 0:
+          tftState = SENSORS;
+          sensorScreenPos = 0;
+          substate = 0;
+          redraw = true;
+          break;
+        case 1:
+          tftState = SETTINGS;
+          substate = 0;
+          redraw = true;
+          break;
+        case 2:
+          break;
+      }
+      break;
+
+    case SENSORS:
+      substate = substate % 3;
+      switch (substate) {
+        case 0:
+          // Select button pressed
+          if (sensorScreenPos == 1) {
             sensorScreenPos = 0;
-            substate = 0;
             redraw = true;
-            break;
-          case 1:
-            tftState = SETTINGS;
-            substate = 0;
+          }
+          break;
+        case 1:
+          if (sensorScreenPos == 0) {
+            sensorScreenPos = 1;
             redraw = true;
-            break;
-          case 2:
-            break;
-        }
-        break;
+          }
+          break;
+        case 2:
+          tftState = MAINMENU;
+          substate = 0;
+          redraw = true;
+          // This shouldn't be needed, but it is for some reason
+          break;
+      }
+      break;
 
-      case SENSORS:
-        substate = substate % 3;
-        switch (substate) {
-          case 0:
-            // Select button pressed
-            if (sensorScreenPos == 1) {
-              sensorScreenPos = 0;
-              redraw = true;
-            }
-            break;
-          case 1:
-            if (sensorScreenPos == 0) {
-              sensorScreenPos = 1;
-              redraw = true;
-            }
-            break;
-          case 2:
-            tftState = MAINMENU;
-            substate = 0;
-            redraw = true;
-            // This shouldn't be needed, but it is for some reason
-            break;
-        }
-        break;
+    case SETTINGS:
+      switch (substate) {
+        case 0:  // Temperature unit field selected
+          settings.temperatureUnit =
+              (settings.temperatureUnit == FAHRENHEIT) ? CELSIUS : FAHRENHEIT;
+          tft.fillRect(160, 60, 160, 20, ILI9341_BLUE);
+          break;
 
-      case SETTINGS:
-        switch (substate) {
-          case 0:  // Temperature unit field selected
-            settings.temperatureUnit =
-                (settings.temperatureUnit == FAHRENHEIT) ? CELSIUS : FAHRENHEIT;
-            tft.fillRect(160, 60, 160, 20, ILI9341_BLUE);
-            break;
+        case 1:  // Display update interval field selected
+          settings.displayUpdateIntervalIndex =
+              (settings.displayUpdateIntervalIndex + 1) %
+              settings.intervals.size();
+          tft.fillRect(160, 80, 160, 20, ILI9341_BLUE);
+          break;
 
-          case 1:  // Display update interval field selected
-            settings.displayUpdateIntervalIndex =
-                (settings.displayUpdateIntervalIndex + 1) %
-                settings.intervals.size();
-            tft.fillRect(160, 80, 160, 20, ILI9341_BLUE);
-            break;
+        case 2:  // Data update interval field selected
+          settings.dataUpdateIntervalIndex =
+              (settings.dataUpdateIntervalIndex + 1) %
+              settings.intervals.size();
+          tft.fillRect(160, 100, 160, 20, ILI9341_BLUE);
+          break;
 
-          case 2:  // Data update interval field selected
-            settings.dataUpdateIntervalIndex =
-                (settings.dataUpdateIntervalIndex + 1) %
-                settings.intervals.size();
-            tft.fillRect(160, 100, 160, 20, ILI9341_BLUE);
-            break;
+        case 3:  // OLED screen field selected
+          settings.useOled = !settings.useOled;
+          if (settings.useOled) {
+            oled.ssd1306_command(SSD1306_DISPLAYON);
+          } else {
+            oled.ssd1306_command(SSD1306_DISPLAYOFF);
+          }
+          tft.fillRect(160, 120, 160, 20, ILI9341_BLUE);
+          break;
 
-          case 3:  // OLED screen field selected
-            settings.useOled = !settings.useOled;
-            tft.fillRect(160, 120, 160, 20, ILI9341_BLUE);
-            break;
-
-          case 4:  // Back button selected
-            substate = 0;
-            redraw = true;
-            tftState = MAINMENU;
-            break;
-        }
-    }
+        case 4:  // Back button selected
+          substate = 0;
+          redraw = true;
+          tftState = MAINMENU;
+          break;
+      }
   }
 }
 
@@ -475,50 +455,48 @@ void updateDisplayParams() {
 
 void handleButtonPress() {
   // Check if the user switched to a new menu tab
-  if (isRightButtonPressed) {
-    isRightButtonPressed = false;
+  if (rightButtonPressed) {
+    rightButtonPressed = false;
     substate += 1;
     Serial.println(substate);
-    updateDisplay(oled, tft, data, settings, gps, tftState);
+    updateDisplay(oled, tft, data, settings, gps);
   }
 
   // Check if the user switched to a new menu item
-  if (isLeftButtonPressed) {
-    isLeftButtonPressed = false;
+  if (leftButtonPressed) {
+    leftButtonPressed = false;
     substate -= ((substate == 0) ? 0 : 1);
-    updateDisplay(oled, tft, data, settings, gps, tftState);
+    updateDisplay(oled, tft, data, settings, gps);
   }
 
   // Check if the user clicked on an item
-  if (isSelectButtonPressed) {
+  if (selectButtonPressed) {
     updateDisplayParams();
-    isSelectButtonPressed = false;
-    // TODO: Remove this and replace the above updateDisplay with a parameter
-    // handler
-    updateDisplay(oled, tft, data, settings, gps, tftState);
+    selectButtonPressed = false;
+    updateDisplay(oled, tft, data, settings, gps);
   }
 }
 
-void rightButtonPressed() {
+void rightButtonPress() {
   int timeNow = millis();
   if (timeNow > buttonPressTime + 250) {
-    isRightButtonPressed = true;
+    rightButtonPressed = true;
     buttonPressTime = timeNow;
   }
 }
 
-void leftbuttonPressed() {
+void leftbuttonPress() {
   int timeNow = millis();
   if (timeNow > buttonPressTime + 250) {
-    isLeftButtonPressed = true;
+    leftButtonPressed = true;
     buttonPressTime = timeNow;
   }
 }
 
-void selectButtonPressed() {
+void selectButtonPress() {
   int timeNow = millis();
   if (timeNow > buttonPressTime + 250) {
-    isSelectButtonPressed = true;
+    selectButtonPressed = true;
     buttonPressTime = timeNow;
   }
 }
