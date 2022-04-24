@@ -17,7 +17,7 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
 
 // OLED display frames
 enum Frames { SENSORDATA, GPSDATA, NUM_OLED_FRAMES };
-enum Menus { MAINMENU, SENSORS, SETTINGS, NUM_MENUS };
+enum Menus { MAINMENU, SENSORS, SETTINGS, SLEEP, NUM_MENUS };
 
 uint64_t displayTimer = millis();
 uint64_t oledFrameTimer = millis();
@@ -352,8 +352,13 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
           tft.println("<<<");
           break;
       }
+      break;
+
+    case SLEEP:
+      // TODO: Actually turn off the display
+      tft.fillScreen(ILI9341_BLACK);
+      break;
   }
-  // }
 }
 
 /**
@@ -361,8 +366,6 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
  *
  */
 void updateDisplayParams() {
-  // if (settings.useOled) {
-  // } else {
   switch (tftState) {
     case MAINMENU:
       substate = substate % 3;
@@ -379,7 +382,9 @@ void updateDisplayParams() {
           redraw = true;
           break;
         case 2:
-          break;
+          tftState = SLEEP;
+          substate = 0;
+          redraw = true;
       }
       break;
 
@@ -446,6 +451,12 @@ void updateDisplayParams() {
           tftState = MAINMENU;
           break;
       }
+      break;
+    case SLEEP:
+      tftState = MAINMENU;
+      substate = 0;
+      redraw = true;
+      break;
   }
 }
 

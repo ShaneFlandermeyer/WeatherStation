@@ -124,7 +124,7 @@ void loop() {
     updateDisplay(oled, tft, data, settings, gps);
   }
 
-  if (millis() - oledFrameTimer > 5000) {
+  if (settings.useOled and millis() - oledFrameTimer > 5000) {
     oledFrameTimer = millis();
     oledState = (oledState + 1) % NUM_OLED_FRAMES;
     updateDisplay(oled, tft, data, settings, gps);
