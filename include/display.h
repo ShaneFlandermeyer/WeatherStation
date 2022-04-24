@@ -19,6 +19,9 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
 // enum Frames { SENSORS = 0, GPSDATA = 1, SETTINGS = 2 };
 enum Menus { MAINMENU, SENSORS, SETTINGS, NUM_MENUS };
 
+uint64_t displayTimer = millis();
+volatile uint64_t buttonPressTime = 0;
+
 uint8_t tftState = 0;
 uint8_t substate = 0;
 uint8_t sensorScreenPos = 0;
@@ -463,6 +466,60 @@ void updateDisplayParams() {
             break;
         }
     }
+  }
+}
+
+//****************************************************************************
+// * Input handling and interrupts
+//****************************************************************************
+
+void handleButtonPress() {
+  // Check if the user switched to a new menu tab
+  if (isRightButtonPressed) {
+    isRightButtonPressed = false;
+    substate += 1;
+    Serial.println(substate);
+    updateDisplay(oled, tft, data, settings, gps, tftState);
+  }
+
+  // Check if the user switched to a new menu item
+  if (isLeftButtonPressed) {
+    isLeftButtonPressed = false;
+    substate -= ((substate == 0) ? 0 : 1);
+    updateDisplay(oled, tft, data, settings, gps, tftState);
+  }
+
+  // Check if the user clicked on an item
+  if (isSelectButtonPressed) {
+    updateDisplayParams();
+    isSelectButtonPressed = false;
+    // TODO: Remove this and replace the above updateDisplay with a parameter
+    // handler
+    updateDisplay(oled, tft, data, settings, gps, tftState);
+  }
+}
+
+void rightButtonPressed() {
+  int timeNow = millis();
+  if (timeNow > buttonPressTime + 250) {
+    isRightButtonPressed = true;
+    buttonPressTime = timeNow;
+  }
+}
+
+void leftbuttonPressed() {
+  int timeNow = millis();
+  if (timeNow > buttonPressTime + 250) {
+    isLeftButtonPressed = true;
+    buttonPressTime = timeNow;
+  }
+}
+
+void selectButtonPressed() {
+  int timeNow = millis();
+  if (timeNow > buttonPressTime + 250) {
+    isSelectButtonPressed = true;
+    buttonPressTime = timeNow;
   }
 }
 

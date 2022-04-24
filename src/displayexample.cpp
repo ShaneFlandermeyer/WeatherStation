@@ -6,10 +6,10 @@
 /**
     Function declarations
 */
-void rightButtonPressed();
-void leftbuttonPressed();
-void selectButtonPressed();
-void handleButtonPress();
+// void rightButtonPressed();
+// void leftbuttonPressed();
+// void selectButtonPressed();
+// void handleButtonPress();
 
 /**
    Display variables
@@ -18,12 +18,12 @@ void handleButtonPress();
 */
 // uint8_t line = 0;
 // uint8_t frame = 0;
-uint64_t displayTimer = millis();
+
 
 /*
     IO variables
 */
-volatile uint32_t buttonPressTime = 0;
+// volatile uint32_t buttonPressTime = 0;
 
 void setup() {
   // Input handling
@@ -62,58 +62,7 @@ void loop() {
     updateDisplay(oled, tft, data, settings, gps, tftState);
   }
   data.temperature += 1;
-
 }
 
-//****************************************************************************
-// * Input handling and interrupts
-//****************************************************************************
 
-void handleButtonPress() {
-  // Check if the user switched to a new menu tab
-  if (isRightButtonPressed) {
-    isRightButtonPressed = false;
-    substate += 1;
-    Serial.println(substate);
-    updateDisplay(oled, tft, data, settings, gps, tftState);
-  }
 
-  // Check if the user switched to a new menu item
-  if (isLeftButtonPressed) {
-    isLeftButtonPressed = false;
-    substate -= ((substate == 0) ? 0 : 1);
-    updateDisplay(oled, tft, data, settings, gps, tftState);
-  }
-
-  // Check if the user clicked on an item
-  if (isSelectButtonPressed) {
-    updateDisplayParams();
-    isSelectButtonPressed = false;
-    // TODO: Remove this and replace the above updateDisplay with a parameter handler
-    updateDisplay(oled, tft, data, settings, gps, tftState);
-  }
-}
-
-void rightButtonPressed() {
-  int timeNow = millis();
-  if (timeNow > buttonPressTime + 250) {
-    isRightButtonPressed = true;
-    buttonPressTime = timeNow;
-  }
-}
-
-void leftbuttonPressed() {
-  int timeNow = millis();
-  if (timeNow > buttonPressTime + 250) {
-    isLeftButtonPressed = true;
-    buttonPressTime = timeNow;
-  }
-}
-
-void selectButtonPressed() {
-  int timeNow = millis();
-  if (timeNow > buttonPressTime + 250) {
-    isSelectButtonPressed = true;
-    buttonPressTime = timeNow;
-  }
-}
