@@ -223,7 +223,9 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
         tft.print("WIND DIR.: ");
         tft.setCursor(160, 140);
         tft.print(String(data.windDirection) + " deg");
-      } else {
+      } else if (sensorScreenPos == 1) {
+        // TODO: Clear the correct area for this screen
+        tft.fillRect(160, 60, 160, 120, ILI9341_BLUE);
         tft.setCursor(15, 60);
         tft.print("TIME: ");
         tft.println(String(data.hour) + ":" + String(data.minute) + ":" +
@@ -242,6 +244,28 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
           tft.setCursor(15, 140);
           tft.println("Speed: " + String(data.speed) + " mph");
         }
+      } else { 
+        tft.fillRect(160, 60, 160, 120, ILI9341_BLUE);
+        tft.setCursor(15, 60);
+        tft.print("UV1: ");
+        tft.setCursor(160, 60);
+        tft.print(data.uv[0]);
+        tft.setCursor(15, 80);
+        tft.print("UV2: ");
+        tft.setCursor(160, 80);
+        tft.print(data.uv[1]);
+        tft.setCursor(15, 100);
+        tft.print("UV3: ");
+        tft.setCursor(160, 100);
+        tft.print(data.uv[2]);
+        tft.setCursor(15, 120);
+        tft.print("UV4: ");
+        tft.setCursor(160, 120);
+        tft.print(data.uv[3]);
+        tft.setCursor(15, 140);
+        tft.print("UV5: ");
+        tft.setCursor(160, 140);
+        tft.print(data.uv[4]);
       }
       substate = substate % 3;
       switch (substate) {
@@ -399,21 +423,25 @@ void updateDisplayParams() {
       }
       break;
 
-    case SENSORS:
+    case SENSORS: // TODO: Add third sensor screen
       substate = substate % 3;
       switch (substate) {
         case 0:
-          // Select button pressed
-          if (sensorScreenPos == 1) {
-            sensorScreenPos = 0;
-            redraw = true;
-          }
+          sensorScreenPos = max(0, sensorScreenPos-1);
+          redraw = true;
+          // // Select button pressed
+          // if (sensorScreenPos == 1) {
+          //   sensorScreenPos = 0;
+          //   redraw = true;
+          // }
           break;
         case 1:
-          if (sensorScreenPos == 0) {
-            sensorScreenPos = 1;
-            redraw = true;
-          }
+          sensorScreenPos = (sensorScreenPos + 1) % 3;
+          redraw = true;
+          // if (sensorScreenPos == 0) {
+          //   sensorScreenPos = 1;
+          //   redraw = true;
+          // }
           break;
         case 2:
           tftState = MAINMENU;
