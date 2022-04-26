@@ -62,7 +62,6 @@ void init_oled() {
  *
  */
 void init_tft() {
-  // SPI.begin(SCK, MISO, MOSI, TFT_CS);
   tft.begin();
   tft.setRotation(3);
   if (tft.readcommand8(ILI9341_RDMODE)) {
@@ -125,7 +124,7 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
         break;
     }
     oled.display();
-  }  // else {
+  } 
   switch (tftState) {
     case MAINMENU:
       if (redraw) {
@@ -211,10 +210,9 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
         tft.setCursor(15, 80);
         tft.print("HUMIDITY: ");
         tft.setCursor(160, 80);
-        tft.print(String(100) + " %");
+        tft.print(String(data.humidity) + " %");
         tft.setCursor(15, 100);
         tft.print("UV INDEX: ");
-        // TODO: Average UV sensor readings
         tft.setCursor(160, 100);
         tft.print(1337);
         tft.setCursor(15, 120);
