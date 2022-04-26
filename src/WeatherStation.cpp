@@ -29,10 +29,11 @@ class WeatherStationCallbacks : public BLEServerCallbacks {
 
 void setup() {
   // Input handling
-  pinMode(RIGHT_BUTTON, INPUT_PULLUP);
-  pinMode(LEFT_BUTTON, INPUT_PULLUP);
-  pinMode(SELECT_BUTTON, INPUT_PULLUP);
+  pinMode(RIGHT_BUTTON, INPUT_PULLDOWN);
+  pinMode(LEFT_BUTTON, INPUT_PULLDOWN);
+  pinMode(SELECT_BUTTON, INPUT_PULLDOWN);
   pinMode(TFT_CS, OUTPUT);
+  pinMode(TFT_DC, OUTPUT);
   // Attach interrupt functions
   attachInterrupt(digitalPinToInterrupt(RIGHT_BUTTON), rightButtonPress,
                   FALLING);

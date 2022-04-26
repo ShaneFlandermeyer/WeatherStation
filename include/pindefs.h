@@ -4,7 +4,7 @@
 #define BME_CS 2
 #define TFT_RST 3
 #define OLED_SDA 4
-#define TFT_DC 5
+#define TFT_DC 21
 #define LEFT_BUTTON 12
 #define SELECT_BUTTON 13
 #define RIGHT_BUTTON 14
