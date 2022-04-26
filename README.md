@@ -25,6 +25,10 @@ scratch:
   default shortcut ``Ctrl+Alt+U`` can be used to upload the program without
   using the command prompt.
 
+  **NOTE**: The ESP32 cannot be connected to the BME280
+  temperature/pressure/humidity sensor while uploading new code. This is because
+  the pins that control the ESP32's I2C bus are used during the upload process.
+
   ## Project Structure
   The files relevant for developing this project are given below:
 
