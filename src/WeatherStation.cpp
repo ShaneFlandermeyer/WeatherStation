@@ -83,6 +83,7 @@ void setup() {
   SerialGPS.begin(9600, SERIAL_8N1, GPS_RX, GPS_TX);
 
   // Initialize the SD Card
+  // SPI.begin(SCK, MISO, MOSI, SD_CS);
   if (not SD.begin()) {
     Serial.println("No SD card attached");
   }

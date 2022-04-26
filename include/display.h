@@ -62,7 +62,7 @@ void init_oled() {
  *
  */
 void init_tft() {
-  SPI.begin(SCK, MISO, MOSI, TFT_CS);
+  // SPI.begin(SCK, MISO, MOSI, TFT_CS);
   tft.begin();
   tft.setRotation(3);
   if (tft.readcommand8(ILI9341_RDMODE)) {
@@ -491,6 +491,7 @@ void handleButtonPress() {
     substate += 1;
     Serial.println(substate);
     updateDisplay(oled, tft, data, settings, gps);
+    Serial.println("Right button pressed");
   }
 
   // Check if the user switched to a new menu item
@@ -498,6 +499,7 @@ void handleButtonPress() {
     leftButtonPressed = false;
     substate -= ((substate == 0) ? 0 : 1);
     updateDisplay(oled, tft, data, settings, gps);
+    Serial.println("Left button pressed");
   }
 
   // Check if the user clicked on an item
@@ -505,6 +507,7 @@ void handleButtonPress() {
     updateDisplayParams();
     selectButtonPressed = false;
     updateDisplay(oled, tft, data, settings, gps);
+    Serial.println("Select button pressed");
   }
 }
 
