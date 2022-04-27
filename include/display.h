@@ -106,9 +106,9 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
         if (not gps.location.isValid()) {
           oled.println("Connecting...");
         } else {
-          oled.println("Latitude: " + String(abs(data.lat)) +
+          oled.println("Latitude: " + String(abs(data.lat), 4U) +
                        (data.lat > 0 ? " N" : " S"));
-          oled.println("Longitude: " + String(abs(data.lon)) +
+          oled.println("Longitude: " + String(abs(data.lon), 4U) +
                        (data.lon > 0 ? " E" : " W"));
           oled.println("Altitude: " + String(data.alt) + "m");
           oled.println("Speed: " + String(data.speed) + " mph");
@@ -178,7 +178,6 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
       if (redraw) {
         redraw = false;
         tft.fillScreen(ILI9341_BLUE);
-        // tft.setTextColor(ILI9341_WHITE);
         tft.setTextSize(3);
         tft.fillRect(90, 6, 145, 30, ILI9341_BLACK);
         tft.drawRect(90, 6, 145, 30, ILI9341_WHITE);
@@ -219,47 +218,53 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
         tft.setCursor(160, 140);
         tft.print(String(data.windDirection) + " deg");
       } else if (sensorScreenPos == 1) {
-        // TODO: Clear the correct area for this screen
         tft.fillRect(160, 60, 160, 120, ILI9341_BLUE);
         tft.setCursor(15, 60);
         tft.print("TIME: ");
+        tft.setCursor(160, 60);
         tft.println(String(data.hour) + ":" + String(data.minute) + ":" +
                     String(data.second) + " UTC");
-        if (not gps.location.isValid()) {
-          tft.println("Connecting...");
-        } else {
+        if (gps.location.isValid()) {
           tft.setCursor(15, 80);
-          tft.println("LATITUDE: " + String(abs(data.lat)) +
+          tft.print("LATITUDE: ");
+          tft.setCursor(160, 80);
+          tft.print(String(abs(data.lat),6U) +
                       (data.lat > 0 ? " N" : " S"));
           tft.setCursor(15, 100);
-          tft.println("Longitude: " + String(abs(data.lon)) +
+          tft.print("LONGITUDE: ");
+          tft.setCursor(160, 100);
+          tft.print(String(abs(data.lon),6U) +
                       (data.lon > 0 ? " E" : " W"));
           tft.setCursor(15, 120);
-          tft.println("Altitude: " + String(data.alt) + " m");
+          tft.print("ALTITUDE: ");
+          tft.setCursor(160, 120);
+          tft.print(String(data.alt) + " m");
           tft.setCursor(15, 140);
-          tft.println("Speed: " + String(data.speed) + " mph");
+          tft.print("SPEED: ");
+          tft.setCursor(160, 140);
+          tft.print(String(data.speed) + " mph");
         }
-      } else { 
-        tft.fillRect(160, 60, 160, 120, ILI9341_BLUE);
+      } else {  // UV sensor screen
+        tft.fillRect(100, 60, 220, 120, ILI9341_BLUE);
         tft.setCursor(15, 60);
         tft.print("UV1: ");
-        tft.setCursor(160, 60);
+        tft.setCursor(100, 60);
         tft.print(data.uv[0]);
         tft.setCursor(15, 80);
         tft.print("UV2: ");
-        tft.setCursor(160, 80);
+        tft.setCursor(100, 80);
         tft.print(data.uv[1]);
         tft.setCursor(15, 100);
         tft.print("UV3: ");
-        tft.setCursor(160, 100);
+        tft.setCursor(100, 100);
         tft.print(data.uv[2]);
         tft.setCursor(15, 120);
         tft.print("UV4: ");
-        tft.setCursor(160, 120);
+        tft.setCursor(100, 120);
         tft.print(data.uv[3]);
         tft.setCursor(15, 140);
         tft.print("UV5: ");
-        tft.setCursor(160, 140);
+        tft.setCursor(100, 140);
         tft.print(data.uv[4]);
       }
       substate = substate % 3;

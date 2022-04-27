@@ -27,8 +27,8 @@ struct SensorData {
   float windSpeed;
   float windDirection;
   std::vector<float> uv;
-  float lat;
-  float lon;
+  double lat;
+  double lon;
   float alt;
   int speed;
   uint8_t hour;
@@ -72,7 +72,7 @@ void writeData(fs::FS& fs, SensorData& data, const char* path) {
   File file = fs.open(path);
 
   // CSV column headers
-  String headerStr = "Date, Time, Temperature, Pressure, Humidity, Wind speed, Wind direction, UV1, UV2, UV3, UV4, UV5, Latitude, Longitude";
+  String headerStr = "Date, Time, Temperature, Pressure, Humidity, Wind speed, Wind direction, UV1, UV2, UV3, UV4, UV5, Latitude, Longitude, Altitude, Speed";
   // If the first lins is not the CSV column headers, overwrite the garbage data
   String line = file.readStringUntil('\n');
   if (not line.equals(headerStr)) {
@@ -92,7 +92,7 @@ void writeData(fs::FS& fs, SensorData& data, const char* path) {
     dataString += String(uv) + ",";
   }
   // GPS data
-  dataString += String(data.lat) + "," + String(data.lon) + "," + String(data.alt) + "\n";
+  dataString += String(data.lat,6) + "," + String(data.lon,6) + "," + String(data.alt) + "," + String(data.speed) + "\n";
   appendFile(fs, path, dataString.c_str());
 }
 
