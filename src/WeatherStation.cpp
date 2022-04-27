@@ -93,7 +93,7 @@ void setup() {
 void loop() {
   while (SerialGPS.available() > 0) {
     char c = SerialGPS.read();
-    Serial.print(c);
+    // Serial.print(c);
     gps.encode(c);
   }
   handleButtonPress();

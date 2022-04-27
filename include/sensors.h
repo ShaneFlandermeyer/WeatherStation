@@ -70,19 +70,29 @@ void updateData(SensorData& data, TinyGPSPlus gps, int temperatureUnit) {
 void writeData(fs::FS& fs, SensorData& data, const char* path) {
   // TODO: Add non-pcb sensor data to this operation
   File file = fs.open(path);
-  // File does not exist...make data columns
-  if (not file) {
-    appendFile(
-        fs, path,
-        "Time, Date, Temperature, Pressure, Humidity, Wind speed, Latitude, "
-        "Longitude\n");
+
+  // CSV column headers
+  String headerStr = "Date, Time, Temperature, Pressure, Humidity, Wind speed, Wind direction, UV1, UV2, UV3, UV4, UV5, Latitude, Longitude";
+  // If the first lins is not the CSV column headers, overwrite the garbage data
+  String line = file.readStringUntil('\n');
+  if (not line.equals(headerStr)) {
+    String firstLine = headerStr + "\n";
+    writeFile(fs,path,firstLine.c_str());
+
   }
+  // Sensor data
   String dataString = String(data.date) + "," + String(data.hour) + ":" +
                       String(data.minute) + ":" + String(data.second) +
                       " UTC," + String(data.temperature) + "," +
                       String(data.humidity) + "," + String(data.pressure) +
-                      "," + String(data.windSpeed) + "," + String(data.lat) +
-                      "," + String(data.lon) + "\n";
+                      "," + String(data.windSpeed) + "," + 
+                      String(data.windDirection) + ",";
+  // UV sensor data
+  for (auto uv : data.uv) {
+    dataString += String(uv) + ",";
+  }
+  // GPS data
+  dataString += String(data.lat) + "," + String(data.lon) + "," + String(data.alt) + "\n";
   appendFile(fs, path, dataString.c_str());
 }
 
@@ -131,7 +141,6 @@ std::vector<float> readUV() {
   for (int i = 0; i < uvPins.size(); i++) {
     uvIndex[i] = analogRead(uvPins[i]) * ADC_TO_VOLTAGE / 0.1;
 
-    Serial.println(uvIndex[i]);
   }
   return uvIndex;
 }

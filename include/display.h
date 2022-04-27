@@ -423,19 +423,10 @@ void updateDisplayParams() {
         case 0:
           sensorScreenPos = max(0, sensorScreenPos-1);
           redraw = true;
-          // // Select button pressed
-          // if (sensorScreenPos == 1) {
-          //   sensorScreenPos = 0;
-          //   redraw = true;
-          // }
           break;
         case 1:
           sensorScreenPos = (sensorScreenPos + 1) % 3;
           redraw = true;
-          // if (sensorScreenPos == 0) {
-          //   sensorScreenPos = 1;
-          //   redraw = true;
-          // }
           break;
         case 2:
           tftState = MAINMENU;
