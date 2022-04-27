@@ -64,11 +64,6 @@ void init_oled() {
 void init_tft() {
   tft.begin();
   tft.setRotation(3);
-  if (tft.readcommand8(ILI9341_RDMODE)) {
-    settings.useOled = false;
-  } else {
-    Serial.println("TFT not connected");
-  }
 }
 
 /**
@@ -390,7 +385,6 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
       break;
 
     case SLEEP:
-      // TODO: Actually turn off the display
       tft.fillScreen(ILI9341_BLACK);
       break;
   }
