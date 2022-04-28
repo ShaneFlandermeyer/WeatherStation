@@ -5,17 +5,16 @@
 #define TFT_RST 3
 #define OLED_SDA 4
 #define SD_CS 5
-#define TFT_DC 14
 #define TFT_LED 12
-// #define LEFT_BUTTON 12
 #define SELECT_BUTTON 13
-#define RIGHT_BUTTON 21
+#define TFT_DC 14
 #define OLED_SCL 15
 #define OLED_RST 16
 #define GPS_RX 17
-#define GPS_TX 22
 #define SCK 18
 #define MISO 19
+#define RIGHT_BUTTON 21
+#define GPS_TX 22
 #define MOSI 23
 #define TFT_CS 25
 #define UV1 26
