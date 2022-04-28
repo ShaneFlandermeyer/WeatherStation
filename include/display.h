@@ -206,16 +206,12 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
         tft.setCursor(160, 80);
         tft.print(String(data.humidity) + " %");
         tft.setCursor(15, 100);
-        tft.print("UV INDEX: ");
-        tft.setCursor(160, 100);
-        tft.print(1337);
-        tft.setCursor(15, 120);
         tft.print("WIND SPEED: ");
-        tft.setCursor(160, 120);
+        tft.setCursor(160, 100);
         tft.print(String(data.windSpeed) + " mph");
-        tft.setCursor(15, 140);
+        tft.setCursor(15, 120);
         tft.print("WIND DIR.: ");
-        tft.setCursor(160, 140);
+        tft.setCursor(160, 120);
         tft.print(String(data.windDirection) + " deg");
       } else if (sensorScreenPos == 1) {
         tft.fillRect(160, 60, 160, 120, ILI9341_BLUE);
@@ -390,7 +386,11 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
       break;
 
     case SLEEP:
-      tft.fillScreen(ILI9341_BLACK);
+      digitalWrite(TFT_LED, LOW);
+      digitalWrite(TFT_CS, LOW);
+      digitalWrite(TFT_DC, LOW);
+      SPI.transfer(0x10);
+      digitalWrite(TFT_CS, HIGH);
       break;
   }
 }
@@ -422,7 +422,7 @@ void updateDisplayParams() {
       }
       break;
 
-    case SENSORS: // TODO: Add third sensor screen
+    case SENSORS:
       substate = substate % 3;
       switch (substate) {
         case 0:
@@ -489,8 +489,13 @@ void updateDisplayParams() {
       }
       break;
     case SLEEP:
+      digitalWrite(TFT_LED, HIGH);
+      digitalWrite(TFT_CS, LOW);
+      digitalWrite(TFT_DC, LOW);
+      SPI.transfer(0x11);
+      digitalWrite(TFT_CS, HIGH);
       tftState = MAINMENU;
-      substate = 0;
+      substate = 2;
       redraw = true;
       break;
   }
@@ -510,14 +515,6 @@ void handleButtonPress() {
     Serial.println("Right button pressed");
   }
 
-  // Check if the user switched to a new menu item
-  if (leftButtonPressed) {
-    leftButtonPressed = false;
-    substate -= ((substate == 0) ? 0 : 1);
-    updateDisplay(oled, tft, data, settings, gps);
-    Serial.println("Left button pressed");
-  }
-
   // Check if the user clicked on an item
   if (selectButtonPressed) {
     updateDisplayParams();
@@ -531,14 +528,6 @@ void rightButtonPress() {
   int timeNow = millis();
   if (timeNow > buttonPressTime + debounceDelay) {
     rightButtonPressed = true;
-    buttonPressTime = timeNow;
-  }
-}
-
-void leftbuttonPress() {
-  int timeNow = millis();
-  if (timeNow > buttonPressTime + debounceDelay) {
-    leftButtonPressed = true;
     buttonPressTime = timeNow;
   }
 }

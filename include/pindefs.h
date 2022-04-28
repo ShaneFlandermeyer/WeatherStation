@@ -6,7 +6,8 @@
 #define OLED_SDA 4
 #define SD_CS 5
 #define TFT_DC 14
-#define LEFT_BUTTON 12
+#define TFT_LED 12
+// #define LEFT_BUTTON 12
 #define SELECT_BUTTON 13
 #define RIGHT_BUTTON 21
 #define OLED_SCL 15
