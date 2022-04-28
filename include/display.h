@@ -194,73 +194,98 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
         tft.println("SENSORS");
       }
       tft.setTextSize(2);
+      uint8_t vpos;
       if (sensorScreenPos == 0) {
         tft.fillRect(160, 60, 160, 120, ILI9341_BLUE);
-        tft.setCursor(15, 60);
+        vpos = 50;
+        tft.setCursor(15, vpos);
         tft.print("TEMPERATURE: ");
-        tft.setCursor(160, 60);
+        tft.setCursor(160, vpos);
         tft.print(String((int)data.temperature % 100) +
                   (settings.temperatureUnit == FAHRENHEIT ? "F" : "C"));
-        tft.setCursor(15, 80);
+        vpos += 20;
+        tft.setCursor(15, vpos);
         tft.print("HUMIDITY: ");
-        tft.setCursor(160, 80);
+        tft.setCursor(160, vpos);
         tft.print(String(data.humidity) + " %");
-        tft.setCursor(15, 100);
+        vpos += 20;
+        tft.setCursor(15, vpos);
         tft.print("WIND SPEED: ");
-        tft.setCursor(160, 100);
+        tft.setCursor(160, vpos);
         tft.print(String(data.windSpeed) + " mph");
-        tft.setCursor(15, 120);
+        vpos += 20;
+        tft.setCursor(15, vpos);
         tft.print("WIND DIR.: ");
-        tft.setCursor(160, 120);
+        tft.setCursor(160, vpos);
         tft.print(String(data.windDirection) + " deg");
+        vpos += 20;
+        tft.setCursor(15, vpos);
+        tft.print("SOLAR RAD.: ");
+        tft.setCursor(160, vpos);
+        tft.print(String(1337) + " W/m^2");
+        vpos += 20;
+        tft.setCursor(15, vpos);
+        tft.print("TERR. RAD.: ");
+        tft.setCursor(160, vpos);
+        tft.print(String(1337) + " W/m^2");
       } else if (sensorScreenPos == 1) {
         tft.fillRect(160, 60, 160, 120, ILI9341_BLUE);
-        tft.setCursor(15, 60);
+        vpos = 60;
+        tft.setCursor(15, vpos);
         tft.print("TIME: ");
-        tft.setCursor(160, 60);
+        tft.setCursor(160, vpos);
         tft.println(String(data.hour) + ":" + String(data.minute) + ":" +
                     String(data.second) + " UTC");
         if (gps.location.isValid()) {
-          tft.setCursor(15, 80);
+          vpos += 20;
+          tft.setCursor(15, vpos);
           tft.print("LATITUDE: ");
-          tft.setCursor(160, 80);
+          tft.setCursor(160, vpos);
           tft.print(String(abs(data.lat),6U) +
                       (data.lat > 0 ? " N" : " S"));
-          tft.setCursor(15, 100);
+          vpos += 20;
+          tft.setCursor(15, vpos);
           tft.print("LONGITUDE: ");
-          tft.setCursor(160, 100);
+          tft.setCursor(160, vpos);
           tft.print(String(abs(data.lon),6U) +
                       (data.lon > 0 ? " E" : " W"));
-          tft.setCursor(15, 120);
+          vpos += 20;
+          tft.setCursor(15, vpos);
           tft.print("ALTITUDE: ");
-          tft.setCursor(160, 120);
+          tft.setCursor(160, vpos);
           tft.print(String(data.alt) + " m");
-          tft.setCursor(15, 140);
+          vpos += 20;
+          tft.setCursor(15, vpos);
           tft.print("SPEED: ");
-          tft.setCursor(160, 140);
+          tft.setCursor(160, vpos);
           tft.print(String(data.speed) + " mph");
         }
       } else {  // UV sensor screen
         tft.fillRect(100, 60, 220, 120, ILI9341_BLUE);
-        tft.setCursor(15, 60);
+        vpos = 60;
+        tft.setCursor(15, vpos);
         tft.print("UV1: ");
-        tft.setCursor(100, 60);
+        tft.setCursor(100, vpos);
         tft.print(data.uv[0]);
-        tft.setCursor(15, 80);
+        vpos += 20;
+        tft.setCursor(15, vpos);
         tft.print("UV2: ");
-        tft.setCursor(100, 80);
+        tft.setCursor(100, vpos);
         tft.print(data.uv[1]);
-        tft.setCursor(15, 100);
+        vpos += 20;
+        tft.setCursor(15, vpos);
         tft.print("UV3: ");
-        tft.setCursor(100, 100);
+        tft.setCursor(100, vpos);
         tft.print(data.uv[2]);
-        tft.setCursor(15, 120);
+        vpos += 20;
+        tft.setCursor(15, vpos);
         tft.print("UV4: ");
-        tft.setCursor(100, 120);
+        tft.setCursor(100, vpos);
         tft.print(data.uv[3]);
-        tft.setCursor(15, 140);
+        vpos += 20;
+        tft.setCursor(15, vpos);
         tft.print("UV5: ");
-        tft.setCursor(100, 140);
+        tft.setCursor(100, vpos);
         tft.print(data.uv[4]);
       }
       substate = substate % 3;
