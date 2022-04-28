@@ -90,7 +90,7 @@ void writeData(fs::FS& fs, SensorData& data, const char* path) {
   String dataString = String(data.date) + "," + String(data.hour) + ":" +
                       String(data.minute) + ":" + String(data.second) +
                       " UTC," + String(data.temperature) + "," +
-                      String(data.humidity) + "," + String(data.pressure) +
+                      String(data.pressure) + "," + String(data.humidity) +
                       "," + String(data.windSpeed) + "," + 
                       String(data.windDirection) + ",";
   // UV sensor data
@@ -118,7 +118,7 @@ float readTemperature(int unit) {
 float readWindSpeed() {
   analogReadResolution(10);
   const float zeroWindAdjustment =
-      -0.1;  // negative numbers yield smaller wind speeds and vice versa.
+      -0.14;  // negative numbers yield smaller wind speeds and vice versa.
   float tmp_adc = analogRead(TMP);
   float rv_v = analogRead(RV) * 0.0048828125;
 

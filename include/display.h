@@ -196,13 +196,13 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
       tft.setTextSize(2);
       uint8_t vpos;
       if (sensorScreenPos == 0) {
-        tft.fillRect(160, 60, 160, 120, ILI9341_BLUE);
+        tft.fillRect(160, 50, 160, 120, ILI9341_BLUE);
         vpos = 50;
         tft.setCursor(15, vpos);
         tft.print("TEMPERATURE: ");
         tft.setCursor(160, vpos);
-        tft.print(String((int)data.temperature % 100) +
-                  (settings.temperatureUnit == FAHRENHEIT ? "F" : "C"));
+        tft.print(String(data.temperature) +
+                  (settings.temperatureUnit == FAHRENHEIT ? " F" : " C"));
         vpos += 20;
         tft.setCursor(15, vpos);
         tft.print("HUMIDITY: ");
