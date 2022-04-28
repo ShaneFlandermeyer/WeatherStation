@@ -222,12 +222,12 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
         tft.setCursor(15, vpos);
         tft.print("SOLAR RAD.: ");
         tft.setCursor(160, vpos);
-        tft.print(String(1337) + " W/m^2");
+        tft.print(String(data.solarRadiation) + " W/m^2");
         vpos += 20;
         tft.setCursor(15, vpos);
         tft.print("TERR. RAD.: ");
         tft.setCursor(160, vpos);
-        tft.print(String(1337) + " W/m^2");
+        tft.print(String(data.terrestrialRadiation) + " W/m^2");
       } else if (sensorScreenPos == 1) {
         tft.fillRect(160, 60, 160, 120, ILI9341_BLUE);
         vpos = 60;

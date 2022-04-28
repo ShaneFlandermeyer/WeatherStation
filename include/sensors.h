@@ -16,6 +16,8 @@
 float readWindSpeed();
 float readWindDirection();
 float readTemperature(int units);
+float readSolarRadiation();
+float readTerrestrialRadiation();
 
 std::vector<float> readUV();
 
@@ -27,6 +29,8 @@ struct SensorData {
   float windSpeed;
   float windDirection;
   std::vector<float> uv;
+  float solarRadiation;
+  float terrestrialRadiation;
   double lat;
   double lon;
   float alt;
@@ -65,6 +69,8 @@ void updateData(SensorData& data, TinyGPSPlus gps, int temperatureUnit) {
   data.windSpeed = readWindSpeed();
   data.windDirection = readWindDirection();
   data.uv = readUV();
+  data.solarRadiation = readSolarRadiation();
+  data.terrestrialRadiation = readTerrestrialRadiation();
 }
 
 void writeData(fs::FS& fs, SensorData& data, const char* path) {
@@ -146,6 +152,24 @@ std::vector<float> readUV() {
 
   }
   return uvIndex;
+}
+
+/*
+ * Convert the temperature difference between thermocouples to a radiation value
+ * in W/m^2 using the Stefan-Boltzmann equation for the SOLAR radiometer
+ */
+float readSolarRadiation() {
+  // TODO: Do the math
+  return 1337;
+}
+
+/*
+ * Convert the temperature difference between thermocouples to a radiation value
+ * in W/m^2 using the Stefan-Boltzmann equation for the TERRESTRIAL radiometer
+ */
+float readTerrestrialRadiation() {
+  // TODO: Do the math
+  return 1337;
 }
 
 #endif /* B32C52E8_0A82_4B4F_BB96_D6D227CC2F94 */
