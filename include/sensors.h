@@ -118,11 +118,11 @@ float readTemperature(int unit) {
 float readWindSpeed() {
   analogReadResolution(10);
   const float zeroWindAdjustment =
-      -0.14;  // negative numbers yield smaller wind speeds and vice versa.
+      -0.165;  // negative numbers yield smaller wind speeds and vice versa.
   float tmp_adc = analogRead(TMP);
   float rv_v = analogRead(RV) * 0.0048828125;
 
-  analogReadResolution(12);
+  
 
   float zero_wind_adc = -0.0006 * ((float)tmp_adc * (float)tmp_adc) +
                         1.0727 * (float)tmp_adc + 47.172;  //  13.0C  553 482.39
@@ -134,6 +134,7 @@ float readWindSpeed() {
   // V0 is zero wind at a particular temperature
   // The constants b and c were determined by some Excel wrangling with the
   // solver.
+  analogReadResolution(12);
   return pow(((rv_v - zero_wind_v) / .2300), 2.7265);
 }
 
