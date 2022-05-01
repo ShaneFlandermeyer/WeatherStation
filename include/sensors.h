@@ -5,6 +5,7 @@
 #include <Adafruit_Sensor.h>
 #include <HardwareSerial.h>
 #include <TinyGPS++.h>
+#include <Adafruit_MAX31855.h>
 
 #include <vector>
 
@@ -47,6 +48,8 @@ struct SensorData {
 std::vector<int> uvPins = {UV1, UV2, UV3, UV4, UV5};
 TinyGPSPlus gps;
 Adafruit_BME280 bme(BME_CS);
+// TODO: Define thermocouple SPI pins
+Adafruit_MAX31855 thermocouple(1,2,3);
 SensorData data;
 
 void updateData(SensorData& data, TinyGPSPlus gps, int temperatureUnit) {
@@ -118,7 +121,7 @@ float readTemperature(int unit) {
 float readWindSpeed() {
   analogReadResolution(10);
   const float zeroWindAdjustment =
-      -0.165;  // negative numbers yield smaller wind speeds and vice versa.
+      -0.1;  // negative numbers yield smaller wind speeds and vice versa.
   float tmp_adc = analogRead(TMP);
   float rv_v = analogRead(RV) * 0.0048828125;
 
@@ -160,8 +163,11 @@ std::vector<float> readUV() {
  * in W/m^2 using the Stefan-Boltzmann equation for the SOLAR radiometer
  */
 float readSolarRadiation() {
-  // TODO: Do the math
-  return 1337;
+  // TODO: Convert each temperature to W/m^2 separately
+  double tc_kelvin = thermocouple.readCelsius() + 273.15;
+  double bme_kelvin = bme.readTemperature() + 273.15;
+  double dT = tc_kelvin - bme_kelvin;
+  return STEFAN_BOLTZMANN * pow(dT,4);
 }
 
 /*
@@ -169,8 +175,10 @@ float readSolarRadiation() {
  * in W/m^2 using the Stefan-Boltzmann equation for the TERRESTRIAL radiometer
  */
 float readTerrestrialRadiation() {
-  // TODO: Do the math
-  return 1337;
+  double tc_kelvin = -10000000; // TODO: Read me
+  double bme_kelvin = bme.readTemperature() + 273.15;
+  double dT = tc_kelvin - bme_kelvin;
+  return STEFAN_BOLTZMANN * pow(dT,4);
 }
 
 #endif /* B32C52E8_0A82_4B4F_BB96_D6D227CC2F94 */
