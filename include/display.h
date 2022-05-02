@@ -5,6 +5,7 @@
 #include <Adafruit_ILI9341.h>
 #include <Adafruit_SSD1306.h>
 #include <SPI.h>
+#include <PCF8574.h>
 
 #include "constants.h"
 #include "pindefs.h"
@@ -33,6 +34,7 @@ bool redraw = true;
 Settings settings;
 Adafruit_SSD1306 oled(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RST);
 Adafruit_ILI9341 tft(TFT_CS, TFT_DC, TFT_RST);
+PCF8574 pcf8574(0x20);
 
 // bool useOled = true;
 volatile bool rightButtonPressed = false;
@@ -532,6 +534,28 @@ void updateDisplayParams() {
 
 void handleButtonPress() {
   // Check if the user switched to a new menu tab
+  if (pcf8574.read(0)) {
+    rightButtonPressed = false;
+    substate += 1;
+    Serial.println(substate);
+    updateDisplay(oled, tft, data, settings, gps);
+    Serial.println("Right button pressed");
+    while (pcf8574.read(0)) {
+      delay(50);
+    }
+  }
+
+  // Check if the user clicked on an item
+  if (pcf8574.read(1)) {
+    updateDisplayParams();
+    selectButtonPressed = false;
+    updateDisplay(oled, tft, data, settings, gps);
+    Serial.println("Select button pressed");
+    while (pcf8574.read(1)) {
+      delay(50);
+    }
+  }
+
   if (rightButtonPressed) {
     rightButtonPressed = false;
     substate += 1;

@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <HardwareSerial.h>
 #include <SD.h>
-
+#include <PCF8574.h>
 #include <sstream>
 #include <vector>
 
@@ -28,25 +28,16 @@ class WeatherStationCallbacks : public BLEServerCallbacks {
 };
 
 void setup() {
-  // Input handling
-  pinMode(RIGHT_BUTTON, INPUT_PULLDOWN);
-  pinMode(SELECT_BUTTON, INPUT_PULLDOWN);
   pinMode(TFT_CS, OUTPUT);
   pinMode(TFT_DC, OUTPUT);
   pinMode(TFT_LED, OUTPUT);
   digitalWrite(TFT_LED, HIGH);
-  // Attach interrupt functions
-  attachInterrupt(digitalPinToInterrupt(RIGHT_BUTTON), rightButtonPress,
-                  FALLING);
-  // attachInterrupt(digitalPinToInterrupt(LEFT_BUTTON), leftbuttonPress, FALLING);
-  attachInterrupt(digitalPinToInterrupt(SELECT_BUTTON), selectButtonPress,
-                  FALLING);
   Serial.begin(9600);
   // Wait for USB Serial
   while (not Serial) {
     yield();
   }
-
+  pcf8574.begin(4,15,0);
   init_tft();
   init_oled();
   bme.begin();
