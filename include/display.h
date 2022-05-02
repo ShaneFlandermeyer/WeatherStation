@@ -541,7 +541,7 @@ void handleButtonPress() {
     updateDisplay(oled, tft, data, settings, gps);
     Serial.println("Right button pressed");
     while (pcf8574.read(0)) {
-      delay(50);
+      delay(25);
     }
   }
 
@@ -552,7 +552,7 @@ void handleButtonPress() {
     updateDisplay(oled, tft, data, settings, gps);
     Serial.println("Select button pressed");
     while (pcf8574.read(1)) {
-      delay(50);
+      delay(25);
     }
   }
 

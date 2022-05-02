@@ -83,13 +83,7 @@ void setup() {
 // * Processing loop
 // *******************************************************************************
 void loop() {
-  while (SerialGPS.available() > 0) {
-    char c = SerialGPS.read();
-    // Serial.print(c);
-    gps.encode(c);
-  }
-  handleButtonPress();
-
+  uint32_t start = millis();
   // Periodic data update
   if (millis() - dataTimer >
       settings.intervals[settings.dataUpdateIntervalIndex] * 1000) {
@@ -121,4 +115,16 @@ void loop() {
     oledState = (oledState + 1) % NUM_OLED_FRAMES;
     updateDisplay(oled, tft, data, settings, gps);
   }
+  uint32_t end = millis();
+
+
+  while (millis() - start < 1000 - (end - start)) {
+    handleButtonPress();
+    while (SerialGPS.available() > 0) {
+      char c = SerialGPS.read();
+      gps.encode(c);
+    }
+  }
+  
+
 }
