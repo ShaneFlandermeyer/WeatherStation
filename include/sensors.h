@@ -17,8 +17,8 @@
 float readWindSpeed();
 float readWindDirection();
 float readTemperature(int units);
-float readSolarRadiation();
-float readTerrestrialRadiation();
+double readSolarRadiation();
+double readTerrestrialRadiation();
 
 std::vector<float> readUV();
 
@@ -112,6 +112,8 @@ void writeData(fs::FS& fs, SensorData& data, const char* path) {
 float readTemperature(int unit) {
   float temperature = bme.readTemperature();
   if (unit == FAHRENHEIT) temperature = (9.0 / 5.0) * temperature + 32;
+  Serial.println("Temperature: " + String(temperature) + " " +
+                 (unit == FAHRENHEIT ? "F" : "C")); 
   return temperature;
 }
 
@@ -122,7 +124,7 @@ float readTemperature(int unit) {
 float readWindSpeed() {
   analogReadResolution(10);
   const float zeroWindAdjustment =
-      -0.1;  // negative numbers yield smaller wind speeds and vice versa.
+      -0.11;  // negative numbers yield smaller wind speeds and vice versa.
   float tmp_adc = analogRead(TMP);
   float rv_v = analogRead(RV) * 0.0048828125;
 
@@ -139,12 +141,16 @@ float readWindSpeed() {
   // The constants b and c were determined by some Excel wrangling with the
   // solver.
   analogReadResolution(12);
-  return pow(((rv_v - zero_wind_v) / .2300), 2.7265);
+  float windSpeed = pow(((rv_v - zero_wind_v) / .2300), 2.7265);
+  Serial.println("Wind speed: "  + String(windSpeed) + " mph");
+  return windSpeed;
 }
 
 float readWindDirection() {
   // Convert the voltage to an angle
-  return analogRead(WIND_DIRECTION) * ADC_TO_VOLTAGE / 5 * 359;
+  float windDirection = analogRead(WIND_DIRECTION) * ADC_TO_VOLTAGE / 5 * 359;
+  Serial.println("Wind direction: " + String(windDirection) + " deg");
+  return windDirection;
 }
 
 /**
@@ -163,28 +169,21 @@ std::vector<float> readUV() {
  * Convert the temperature difference between thermocouples to a radiation value
  * in W/m^2 using the Stefan-Boltzmann equation for the SOLAR radiometer
  */
-float readSolarRadiation() {
-  // solar.begin();
-  // TODO: Convert each temperature to W/m^2 separately
-  // double tc_kelvin = thermocouple.readCelsius() + 273.15;
-  // double bme_kelvin = bme.readTemperature() + 273.15;
-  // double dT = tc_kelvin - bme_kelvin;
-  // return STEFAN_BOLTZMANN * pow(dT,4);
-  // return (analogReadMilliVolts(ANALOG_THERMOCOUPLE)*1e-3-1.25)/5e-3;
-  // Serial.println(solar.readFahrenheit());
-  return solar.readFahrenheit();
+double readSolarRadiation() {
+  double tc = STEFAN_BOLTZMANN*pow(solar.readCelsius() + 273.15,4);
+  double ref = STEFAN_BOLTZMANN*pow(bme.readTemperature() + 273.15,4);
+  return abs(ref-tc);
+  
 }
 
 /*
  * Convert the temperature difference between thermocouples to a radiation value
  * in W/m^2 using the Stefan-Boltzmann equation for the TERRESTRIAL radiometer
  */
-float readTerrestrialRadiation() {
-  // double tc_kelvin = -10000000; // TODO: Read me
-  // double bme_kelvin = bme.readTemperature() + 273.15;
-  // double dT = tc_kelvin - bme_kelvin;
-  // return STEFAN_BOLTZMANN * pow(dT,4);
-  return terrestrial.readFahrenheit();
+double readTerrestrialRadiation() {
+  double tc = STEFAN_BOLTZMANN*pow(terrestrial.readCelsius() + 273.15,4);
+  double ref = STEFAN_BOLTZMANN*pow(bme.readTemperature() + 273.15,4);
+  return abs(ref-tc);
 }
 
 #endif /* B32C52E8_0A82_4B4F_BB96_D6D227CC2F94 */

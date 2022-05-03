@@ -1,19 +1,3 @@
-// // /***************************************************
-// //   This is an example for the Adafruit Thermocouple Sensor w/MAX31855K
-
-// //   Designed specifically to work with the Adafruit Thermocouple Sensor
-// //   ----> https://www.adafruit.com/products/269
-
-// //   These displays use SPI to communicate, 3 pins are required to
-// //   interface
-// //   Adafruit invests time and resources providing this open source code,
-// //   please support Adafruit and open-source hardware by purchasing
-// //   products from Adafruit!
-
-// //   Written by Limor Fried/Ladyada for Adafruit Industries.
-// //   BSD license, all text above must be included in any redistribution
-// //  ****************************************************/
-
 // #include <SPI.h>
 // #include "Adafruit_MAX31855.h"
 // #include <Adafruit_BME280.h>
@@ -43,16 +27,32 @@
 // }
 
 // double readSolarRadiation() {
-//   double tc = STEFAN_BOLTZMANN*pow(solar.readCelsius() + 273.15,4);
+//   double tc_temp = 0;
+//   for (int i = 0; i < 10; i++) {
+//     tc_temp += solar.readCelsius() + 273.15;
+//   }
+//   tc_temp /= 10;
+//   Serial.println("Solar Temp = " + String(tc_temp) + " K");
+//   double tc = STEFAN_BOLTZMANN*pow(tc_temp, 4);
 //   double ref = STEFAN_BOLTZMANN*pow(readRefTemp(),4);
-//   return abs(ref-tc);
+//   double rad = abs(ref-tc);
+//   Serial.println("Solar Rad = " + String(rad) +"W/m^2");
+//   return rad;
   
 // }
 
 // double readTerrestrialRadiation() {
-//   double tc = STEFAN_BOLTZMANN*pow(terrestrial.readCelsius() + 273.15,4);
+//   double tc_temp = 0;
+//   for (int i = 0; i < 10; i++) {
+//     tc_temp += terrestrial.readCelsius() + 273.15;
+//   }
+//   tc_temp /= 10;
+//   Serial.println("Terrestrial Temp = " + String(tc_temp) + " K");
+//   double tc = STEFAN_BOLTZMANN*pow(tc_temp,4);
 //   double ref = STEFAN_BOLTZMANN*pow(readRefTemp(),4);
-//   return abs(ref-tc);
+//   double rad = abs(ref-tc);
+//   Serial.println("Terrestrial Rad = " + String(rad) +"W/m^2");
+//   return rad;
 // }
 
 // void setup() {
@@ -79,6 +79,7 @@
 
 // void loop() {
 //   // basic readout test, just print the current temp
+  
 //    Serial.print("Terrestrial = ");
 //    Serial.println(readTerrestrialRadiation());
 //    Serial.print("Solar = ");

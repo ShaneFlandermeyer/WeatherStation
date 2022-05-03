@@ -50,8 +50,6 @@ void setup() {
   init_oled();
   bme.begin();
   
-  
-  
   BLEDevice::init("Portable Weather Station");
   BLEServer *server = BLEDevice::createServer();
   server->setCallbacks(new WeatherStationCallbacks());
