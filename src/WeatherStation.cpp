@@ -32,11 +32,11 @@ void setup() {
   pinMode(TFT_DC, OUTPUT);
   digitalWrite(BME_CS, HIGH);
   digitalWrite(SD_CS,HIGH);
-  digitalWrite(SOLAR_THERMOCOUPLE,HIGH);
-  digitalWrite(TERRESTRIAL_THERMOCOUPLE,HIGH);
+  // digitalWrite(SOLAR_THERMOCOUPLE,HIGH);
+  // digitalWrite(TERRESTRIAL_THERMOCOUPLE,HIGH);
   
-  // pinMode(TFT_LED, OUTPUT);
-  // digitalWrite(TFT_LED, HIGH);
+  pinMode(TFT_LED, OUTPUT);
+  digitalWrite(TFT_LED, HIGH);
 
   Serial.begin(9600);
   // Wait for USB Serial
@@ -83,8 +83,8 @@ void setup() {
   SerialGPS.begin(9600, SERIAL_8N1, GPS_RX, GPS_TX);
 
   // Initialize the SD Card
-  solar.begin();
-  terrestrial.begin();
+  // solar.begin();
+  // terrestrial.begin();
   if (not SD.begin()) {
     Serial.println("No SD card attached");
   }

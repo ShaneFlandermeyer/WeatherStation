@@ -69,7 +69,9 @@ void updateData(SensorData& data, TinyGPSPlus gps, int temperatureUnit) {
   }
   data.temperature = readTemperature(temperatureUnit);
   data.humidity = bme.readHumidity();
+  Serial.println("Humidity: " + String(data.humidity));
   data.pressure = bme.readPressure() / 100;
+  Serial.println("Pressure: " + String(data.pressure) + " hPa");
   data.windSpeed = readWindSpeed();
   data.windDirection = readWindDirection();
   data.uv = readUV();
@@ -78,11 +80,10 @@ void updateData(SensorData& data, TinyGPSPlus gps, int temperatureUnit) {
 }
 
 void writeData(fs::FS& fs, SensorData& data, const char* path) {
-  // TODO: Add non-pcb sensor data to this operation
   File file = fs.open(path);
 
   // CSV column headers
-  String headerStr = "Date, Time, Temperature, Pressure, Humidity, Wind speed, Wind direction, UV1, UV2, UV3, UV4, UV5, Latitude, Longitude, Altitude, Speed";
+  String headerStr = "Date, Time, Temperature, Pressure, Humidity, Wind speed, Wind direction, UV1, UV2, UV3, UV4, UV5, Latitude, Longitude, Altitude, Speed, Terrestrial Radiation, Solar Radiation\n";
   // If the first lins is not the CSV column headers, overwrite the garbage data
   String line = file.readStringUntil('\n');
   if (not line.equals(headerStr)) {
@@ -103,6 +104,7 @@ void writeData(fs::FS& fs, SensorData& data, const char* path) {
   }
   // GPS data
   dataString += String(data.lat,6) + "," + String(data.lon,6) + "," + String(data.alt) + "," + String(data.speed) + "\n";
+  dataString += String(data.solarRadiation) + "," + String(data.terrestrialRadiation) + "\n";
   appendFile(fs, path, dataString.c_str());
 }
 
@@ -170,9 +172,23 @@ std::vector<float> readUV() {
  * in W/m^2 using the Stefan-Boltzmann equation for the SOLAR radiometer
  */
 double readSolarRadiation() {
-  double tc = STEFAN_BOLTZMANN*pow(solar.readCelsius() + 273.15,4);
-  double ref = STEFAN_BOLTZMANN*pow(bme.readTemperature() + 273.15,4);
-  return abs(ref-tc);
+  // double tc_temp = 0;
+  // double ref_temp = 0;
+  // for (int i = 0; i < 10; i++) {
+  //   tc_temp += solar.readCelsius() + 273.15;
+  //   ref_temp += bme.readTemperature();
+  // }
+  // tc_temp /= 10;
+  // ref_temp /= 10;
+  // double tc = STEFAN_BOLTZMANN*pow(tc_temp, 4);
+  // double ref = STEFAN_BOLTZMANN*pow(bme.readTemperature(),4);
+  // double rad = abs(ref-tc);
+  // Serial.println("Reference Temp = " + String(ref_temp) + " K");
+  // Serial.println("Solar Temp = " + String(tc_temp) + " K");
+  // Serial.println("Solar Rad = " + String(rad) +" W/m^2");
+  // Serial.println();
+  // return rad;
+  return 0;
   
 }
 
@@ -181,9 +197,24 @@ double readSolarRadiation() {
  * in W/m^2 using the Stefan-Boltzmann equation for the TERRESTRIAL radiometer
  */
 double readTerrestrialRadiation() {
-  double tc = STEFAN_BOLTZMANN*pow(terrestrial.readCelsius() + 273.15,4);
-  double ref = STEFAN_BOLTZMANN*pow(bme.readTemperature() + 273.15,4);
-  return abs(ref-tc);
+  // double tc_temp = 0;
+  // double ref_temp = 0;
+  // for (int i = 0; i < 10; i++) {
+  //   tc_temp += terrestrial.readCelsius() + 273.15;
+  //   ref_temp += bme.readTemperature() + 273.15;
+  // }
+  // tc_temp /= 10;
+  // ref_temp /= 10;
+  
+  // double tc = STEFAN_BOLTZMANN*pow(tc_temp,4);
+  // double ref = STEFAN_BOLTZMANN*pow(bme.readTemperature(),4);
+  // double rad = abs(ref-tc);
+  // Serial.println("Reference Temp = " + String(ref_temp) + " K");
+  // Serial.println("Terrestrial Temp = " + String(tc_temp) + " K");
+  // Serial.println("Terrestrial Rad = " + String(rad) +" W/m^2");
+  // Serial.println();
+  // return rad;
+  return 0;
 }
 
 #endif /* B32C52E8_0A82_4B4F_BB96_D6D227CC2F94 */
