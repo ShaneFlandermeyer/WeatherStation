@@ -93,8 +93,10 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
         oled.print(data.temperature);
         oled.println(settings.temperatureUnit == FAHRENHEIT ? " F" : " C");
         oled.println("Humidity: " + String((int)data.humidity) + "%");
-        oled.println("Pressure: " + String(data.pressure) + " hPa");
+        // oled.println("Pressure: " + String(data.pressure) + " hPa");
         oled.println("Wind speed: " + String(data.windSpeed) + " mph");
+        oled.println("Solar Rad.: " + String(data.solarRadiation) + "W/m^2");
+        oled.println("Terr. Rad.: " + String(data.terrestrialRadiation) + "W/m^2");
         oled.display();
       } break;
 
@@ -413,7 +415,7 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
       break;
 
     case SLEEP:
-      digitalWrite(TFT_LED, LOW);
+      // digitalWrite(TFT_LED, LOW);
       digitalWrite(TFT_CS, LOW);
       digitalWrite(TFT_DC, LOW);
       SPI.transfer(0x10);
@@ -516,7 +518,7 @@ void updateDisplayParams() {
       }
       break;
     case SLEEP:
-      digitalWrite(TFT_LED, HIGH);
+      // digitalWrite(TFT_LED, HIGH);
       digitalWrite(TFT_CS, LOW);
       digitalWrite(TFT_DC, LOW);
       SPI.transfer(0x11);

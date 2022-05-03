@@ -30,17 +30,28 @@ class WeatherStationCallbacks : public BLEServerCallbacks {
 void setup() {
   pinMode(TFT_CS, OUTPUT);
   pinMode(TFT_DC, OUTPUT);
-  pinMode(TFT_LED, OUTPUT);
-  digitalWrite(TFT_LED, HIGH);
+  digitalWrite(BME_CS, HIGH);
+  digitalWrite(SD_CS,HIGH);
+  digitalWrite(SOLAR_THERMOCOUPLE,HIGH);
+  digitalWrite(TERRESTRIAL_THERMOCOUPLE,HIGH);
+  
+  // pinMode(TFT_LED, OUTPUT);
+  // digitalWrite(TFT_LED, HIGH);
+
   Serial.begin(9600);
   // Wait for USB Serial
   while (not Serial) {
     yield();
   }
+  solar.begin();
+  terrestrial.begin();
   pcf8574.begin(4,15,0);
   init_tft();
   init_oled();
   bme.begin();
+  
+  
+  
   BLEDevice::init("Portable Weather Station");
   BLEServer *server = BLEDevice::createServer();
   server->setCallbacks(new WeatherStationCallbacks());
@@ -74,9 +85,12 @@ void setup() {
   SerialGPS.begin(9600, SERIAL_8N1, GPS_RX, GPS_TX);
 
   // Initialize the SD Card
+  solar.begin();
+  terrestrial.begin();
   if (not SD.begin()) {
     Serial.println("No SD card attached");
   }
+  
 }
 
 // *******************************************************************************

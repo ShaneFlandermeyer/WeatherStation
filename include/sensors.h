@@ -49,7 +49,8 @@ std::vector<int> uvPins = {UV1, UV2, UV3, UV4, UV5};
 TinyGPSPlus gps;
 Adafruit_BME280 bme(BME_CS);
 // TODO: Define thermocouple SPI pins
-Adafruit_MAX31855 thermocouple(1,2,3);
+Adafruit_MAX31855 solar(SCK,SOLAR_THERMOCOUPLE, MISO);
+Adafruit_MAX31855 terrestrial(SCK, TERRESTRIAL_THERMOCOUPLE, MISO);
 SensorData data;
 
 void updateData(SensorData& data, TinyGPSPlus gps, int temperatureUnit) {
@@ -153,7 +154,7 @@ std::vector<float> readUV() {
   std::vector<float> uvIndex(uvPins.size());
   for (int i = 0; i < uvPins.size(); i++) {
     uvIndex[i] = analogRead(uvPins[i]) * ADC_TO_VOLTAGE / 0.1;
-
+    Serial.println(String(uvIndex[i]));
   }
   return uvIndex;
 }
@@ -163,11 +164,15 @@ std::vector<float> readUV() {
  * in W/m^2 using the Stefan-Boltzmann equation for the SOLAR radiometer
  */
 float readSolarRadiation() {
+  // solar.begin();
   // TODO: Convert each temperature to W/m^2 separately
-  double tc_kelvin = thermocouple.readCelsius() + 273.15;
-  double bme_kelvin = bme.readTemperature() + 273.15;
-  double dT = tc_kelvin - bme_kelvin;
-  return STEFAN_BOLTZMANN * pow(dT,4);
+  // double tc_kelvin = thermocouple.readCelsius() + 273.15;
+  // double bme_kelvin = bme.readTemperature() + 273.15;
+  // double dT = tc_kelvin - bme_kelvin;
+  // return STEFAN_BOLTZMANN * pow(dT,4);
+  // return (analogReadMilliVolts(ANALOG_THERMOCOUPLE)*1e-3-1.25)/5e-3;
+  // Serial.println(solar.readFahrenheit());
+  return solar.readFahrenheit();
 }
 
 /*
@@ -175,10 +180,11 @@ float readSolarRadiation() {
  * in W/m^2 using the Stefan-Boltzmann equation for the TERRESTRIAL radiometer
  */
 float readTerrestrialRadiation() {
-  double tc_kelvin = -10000000; // TODO: Read me
-  double bme_kelvin = bme.readTemperature() + 273.15;
-  double dT = tc_kelvin - bme_kelvin;
-  return STEFAN_BOLTZMANN * pow(dT,4);
+  // double tc_kelvin = -10000000; // TODO: Read me
+  // double bme_kelvin = bme.readTemperature() + 273.15;
+  // double dT = tc_kelvin - bme_kelvin;
+  // return STEFAN_BOLTZMANN * pow(dT,4);
+  return terrestrial.readFahrenheit();
 }
 
 #endif /* B32C52E8_0A82_4B4F_BB96_D6D227CC2F94 */
