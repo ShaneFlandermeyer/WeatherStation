@@ -5,8 +5,10 @@
 #define TFT_RST 3
 #define OLED_SDA 4
 #define SD_CS 5
-#define TFT_LED 12
 // #define SELECT_BUTTON 13
+#define SOLAR_THERMOCOUPLE 12
+#define TERRESTRIAL_THERMOCOUPLE 13
+#define TFT_LED 12
 #define TFT_DC 14
 #define OLED_SCL 15
 #define OLED_RST 16

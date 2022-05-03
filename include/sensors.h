@@ -17,8 +17,8 @@
 float readWindSpeed();
 float readWindDirection();
 float readTemperature(int units);
-float readSolarRadiation();
-float readTerrestrialRadiation();
+double readSolarRadiation();
+double readTerrestrialRadiation();
 
 std::vector<float> readUV();
 
@@ -49,7 +49,8 @@ std::vector<int> uvPins = {UV1, UV2, UV3, UV4, UV5};
 TinyGPSPlus gps;
 Adafruit_BME280 bme(BME_CS);
 // TODO: Define thermocouple SPI pins
-Adafruit_MAX31855 thermocouple(1,2,3);
+Adafruit_MAX31855 solar(SCK,SOLAR_THERMOCOUPLE, MISO);
+Adafruit_MAX31855 terrestrial(SCK, TERRESTRIAL_THERMOCOUPLE, MISO);
 SensorData data;
 
 void updateData(SensorData& data, TinyGPSPlus gps, int temperatureUnit) {
@@ -68,7 +69,9 @@ void updateData(SensorData& data, TinyGPSPlus gps, int temperatureUnit) {
   }
   data.temperature = readTemperature(temperatureUnit);
   data.humidity = bme.readHumidity();
+  Serial.println("Humidity: " + String(data.humidity));
   data.pressure = bme.readPressure() / 100;
+  Serial.println("Pressure: " + String(data.pressure) + " hPa");
   data.windSpeed = readWindSpeed();
   data.windDirection = readWindDirection();
   data.uv = readUV();
@@ -77,11 +80,10 @@ void updateData(SensorData& data, TinyGPSPlus gps, int temperatureUnit) {
 }
 
 void writeData(fs::FS& fs, SensorData& data, const char* path) {
-  // TODO: Add non-pcb sensor data to this operation
   File file = fs.open(path);
 
   // CSV column headers
-  String headerStr = "Date, Time, Temperature, Pressure, Humidity, Wind speed, Wind direction, UV1, UV2, UV3, UV4, UV5, Latitude, Longitude, Altitude, Speed";
+  String headerStr = "Date, Time, Temperature, Pressure, Humidity, Wind speed, Wind direction, UV1, UV2, UV3, UV4, UV5, Latitude, Longitude, Altitude, Speed, Terrestrial Radiation, Solar Radiation\n";
   // If the first lins is not the CSV column headers, overwrite the garbage data
   String line = file.readStringUntil('\n');
   if (not line.equals(headerStr)) {
@@ -102,6 +104,7 @@ void writeData(fs::FS& fs, SensorData& data, const char* path) {
   }
   // GPS data
   dataString += String(data.lat,6) + "," + String(data.lon,6) + "," + String(data.alt) + "," + String(data.speed) + "\n";
+  dataString += String(data.solarRadiation) + "," + String(data.terrestrialRadiation) + "\n";
   appendFile(fs, path, dataString.c_str());
 }
 
@@ -111,6 +114,8 @@ void writeData(fs::FS& fs, SensorData& data, const char* path) {
 float readTemperature(int unit) {
   float temperature = bme.readTemperature();
   if (unit == FAHRENHEIT) temperature = (9.0 / 5.0) * temperature + 32;
+  Serial.println("Temperature: " + String(temperature) + " " +
+                 (unit == FAHRENHEIT ? "F" : "C")); 
   return temperature;
 }
 
@@ -121,7 +126,7 @@ float readTemperature(int unit) {
 float readWindSpeed() {
   analogReadResolution(10);
   const float zeroWindAdjustment =
-      -0.1;  // negative numbers yield smaller wind speeds and vice versa.
+      -0.11;  // negative numbers yield smaller wind speeds and vice versa.
   float tmp_adc = analogRead(TMP);
   float rv_v = analogRead(RV) * 0.0048828125;
 
@@ -138,12 +143,16 @@ float readWindSpeed() {
   // The constants b and c were determined by some Excel wrangling with the
   // solver.
   analogReadResolution(12);
-  return pow(((rv_v - zero_wind_v) / .2300), 2.7265);
+  float windSpeed = pow(((rv_v - zero_wind_v) / .2300), 2.7265);
+  Serial.println("Wind speed: "  + String(windSpeed) + " mph");
+  return windSpeed;
 }
 
 float readWindDirection() {
   // Convert the voltage to an angle
-  return analogRead(WIND_DIRECTION) * ADC_TO_VOLTAGE / 5 * 359;
+  float windDirection = analogRead(WIND_DIRECTION) * ADC_TO_VOLTAGE / 5 * 359;
+  Serial.println("Wind direction: " + String(windDirection) + " deg");
+  return windDirection;
 }
 
 /**
@@ -153,7 +162,7 @@ std::vector<float> readUV() {
   std::vector<float> uvIndex(uvPins.size());
   for (int i = 0; i < uvPins.size(); i++) {
     uvIndex[i] = analogRead(uvPins[i]) * ADC_TO_VOLTAGE / 0.1;
-
+    Serial.println(String(uvIndex[i]));
   }
   return uvIndex;
 }
@@ -162,23 +171,50 @@ std::vector<float> readUV() {
  * Convert the temperature difference between thermocouples to a radiation value
  * in W/m^2 using the Stefan-Boltzmann equation for the SOLAR radiometer
  */
-float readSolarRadiation() {
-  // TODO: Convert each temperature to W/m^2 separately
-  double tc_kelvin = thermocouple.readCelsius() + 273.15;
-  double bme_kelvin = bme.readTemperature() + 273.15;
-  double dT = tc_kelvin - bme_kelvin;
-  return STEFAN_BOLTZMANN * pow(dT,4);
+double readSolarRadiation() {
+  // double tc_temp = 0;
+  // double ref_temp = 0;
+  // for (int i = 0; i < 10; i++) {
+  //   tc_temp += solar.readCelsius() + 273.15;
+  //   ref_temp += bme.readTemperature();
+  // }
+  // tc_temp /= 10;
+  // ref_temp /= 10;
+  // double tc = STEFAN_BOLTZMANN*pow(tc_temp, 4);
+  // double ref = STEFAN_BOLTZMANN*pow(bme.readTemperature(),4);
+  // double rad = abs(ref-tc);
+  // Serial.println("Reference Temp = " + String(ref_temp) + " K");
+  // Serial.println("Solar Temp = " + String(tc_temp) + " K");
+  // Serial.println("Solar Rad = " + String(rad) +" W/m^2");
+  // Serial.println();
+  // return rad;
+  return 0;
+  
 }
 
 /*
  * Convert the temperature difference between thermocouples to a radiation value
  * in W/m^2 using the Stefan-Boltzmann equation for the TERRESTRIAL radiometer
  */
-float readTerrestrialRadiation() {
-  double tc_kelvin = -10000000; // TODO: Read me
-  double bme_kelvin = bme.readTemperature() + 273.15;
-  double dT = tc_kelvin - bme_kelvin;
-  return STEFAN_BOLTZMANN * pow(dT,4);
+double readTerrestrialRadiation() {
+  // double tc_temp = 0;
+  // double ref_temp = 0;
+  // for (int i = 0; i < 10; i++) {
+  //   tc_temp += terrestrial.readCelsius() + 273.15;
+  //   ref_temp += bme.readTemperature() + 273.15;
+  // }
+  // tc_temp /= 10;
+  // ref_temp /= 10;
+  
+  // double tc = STEFAN_BOLTZMANN*pow(tc_temp,4);
+  // double ref = STEFAN_BOLTZMANN*pow(bme.readTemperature(),4);
+  // double rad = abs(ref-tc);
+  // Serial.println("Reference Temp = " + String(ref_temp) + " K");
+  // Serial.println("Terrestrial Temp = " + String(tc_temp) + " K");
+  // Serial.println("Terrestrial Rad = " + String(rad) +" W/m^2");
+  // Serial.println();
+  // return rad;
+  return 0;
 }
 
 #endif /* B32C52E8_0A82_4B4F_BB96_D6D227CC2F94 */

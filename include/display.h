@@ -534,59 +534,60 @@ void updateDisplayParams() {
 
 void handleButtonPress() {
   // Check if the user switched to a new menu tab
+
+  // Check if the user clicked on an item
   if (pcf8574.read(0)) {
-    rightButtonPressed = false;
-    substate += 1;
-    Serial.println(substate);
+    updateDisplayParams();
+    selectButtonPressed = false;
     updateDisplay(oled, tft, data, settings, gps);
-    Serial.println("Right button pressed");
+    Serial.println("Select button pressed");
     while (pcf8574.read(0)) {
       delay(25);
     }
   }
 
-  // Check if the user clicked on an item
   if (pcf8574.read(1)) {
-    updateDisplayParams();
-    selectButtonPressed = false;
-    updateDisplay(oled, tft, data, settings, gps);
-    Serial.println("Select button pressed");
-    while (pcf8574.read(1)) {
-      delay(25);
-    }
-  }
-
-  if (rightButtonPressed) {
     rightButtonPressed = false;
     substate += 1;
     Serial.println(substate);
     updateDisplay(oled, tft, data, settings, gps);
     Serial.println("Right button pressed");
+    while (pcf8574.read(1)) {
+      delay(25);
+    }
   }
 
-  // Check if the user clicked on an item
-  if (selectButtonPressed) {
-    updateDisplayParams();
-    selectButtonPressed = false;
-    updateDisplay(oled, tft, data, settings, gps);
-    Serial.println("Select button pressed");
-  }
+  // if (rightButtonPressed) {
+  //   rightButtonPressed = false;
+  //   substate += 1;
+  //   Serial.println(substate);
+  //   updateDisplay(oled, tft, data, settings, gps);
+  //   Serial.println("Right button pressed");
+  // }
+
+  // // Check if the user clicked on an item
+  // if (selectButtonPressed) {
+  //   updateDisplayParams();
+  //   selectButtonPressed = false;
+  //   updateDisplay(oled, tft, data, settings, gps);
+  //   Serial.println("Select button pressed");
+  // }
 }
 
-void rightButtonPress() {
-  int timeNow = millis();
-  if (timeNow > buttonPressTime + debounceDelay) {
-    rightButtonPressed = true;
-    buttonPressTime = timeNow;
-  }
-}
+// void rightButtonPress() {
+//   int timeNow = millis();
+//   if (timeNow > buttonPressTime + debounceDelay) {
+//     rightButtonPressed = true;
+//     buttonPressTime = timeNow;
+//   }
+// }
 
-void selectButtonPress() {
-  int timeNow = millis();
-  if (timeNow > buttonPressTime + debounceDelay) {
-    selectButtonPressed = true;
-    buttonPressTime = timeNow;
-  }
-}
+// void selectButtonPress() {
+//   int timeNow = millis();
+//   if (timeNow > buttonPressTime + debounceDelay) {
+//     selectButtonPressed = true;
+//     buttonPressTime = timeNow;
+//   }
+// }
 
 #endif /* A93137F1_3D59_4BCC_AB39_F7BC8A5C538F */
