@@ -30,8 +30,14 @@ class WeatherStationCallbacks : public BLEServerCallbacks {
 void setup() {
   pinMode(TFT_CS, OUTPUT);
   pinMode(TFT_DC, OUTPUT);
+  pinMode(RIGHT_BUTTON, INPUT_PULLDOWN);
+  pinMode(SELECT_BUTTON, INPUT_PULLDOWN);
   digitalWrite(BME_CS, HIGH);
   digitalWrite(SD_CS,HIGH);
+  // attachInterrupt(digitalPinToInterrupt(RIGHT_BUTTON), rightButtonPress,
+  //                 FALLING);
+  // attachInterrupt(digitalPinToInterrupt(SELECT_BUTTON), selectButtonPress,
+  //                 FALLING);
   // digitalWrite(SOLAR_THERMOCOUPLE,HIGH);
   // digitalWrite(TERRESTRIAL_THERMOCOUPLE,HIGH);
   
@@ -43,9 +49,9 @@ void setup() {
   while (not Serial) {
     yield();
   }
-  solar.begin();
-  terrestrial.begin();
-  pcf8574.begin(4,15,0);
+  // solar.begin();
+  // terrestrial.begin();
+  // pcf8574.begin(4,15,0);
   init_tft();
   init_oled();
   bme.begin();
@@ -131,8 +137,6 @@ void loop() {
     oledFrameTimer = millis();
     oledState = (oledState + 1) % NUM_OLED_FRAMES;
     updateDisplay(oled, tft, data, settings, gps);
-  }
-  uint32_t end = millis();
-  
+  }  
 
 }

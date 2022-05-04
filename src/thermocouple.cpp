@@ -9,7 +9,7 @@
 // // Example creating a thermocouple instance with software SPI on any three
 // // digital IO pins.
 // #define MAXDO   19
-// #define MAXCS   12 3
+// #define MAXCS   12
 // #define MAXCS2  13
 // #define DHTPIN 14 
 // #define DHTTYPE DHT11
@@ -92,7 +92,7 @@
 // }
 
 // void loop() {
-//   delay(2000);
+//   delay(1000);
 //   readTerrestrialRadiation();
 //   readSolarRadiation();
 //   //  delay(1000);

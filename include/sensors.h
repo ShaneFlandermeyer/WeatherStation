@@ -49,8 +49,8 @@ std::vector<int> uvPins = {UV1, UV2, UV3, UV4, UV5};
 TinyGPSPlus gps;
 Adafruit_BME280 bme(BME_CS);
 // TODO: Define thermocouple SPI pins
-Adafruit_MAX31855 solar(SCK,SOLAR_THERMOCOUPLE, MISO);
-Adafruit_MAX31855 terrestrial(SCK, TERRESTRIAL_THERMOCOUPLE, MISO);
+// Adafruit_MAX31855 solar(SCK,SOLAR_THERMOCOUPLE, MISO);
+// Adafruit_MAX31855 terrestrial(SCK, TERRESTRIAL_THERMOCOUPLE, MISO);
 SensorData data;
 
 void updateData(SensorData& data, TinyGPSPlus gps, int temperatureUnit) {

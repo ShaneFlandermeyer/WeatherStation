@@ -17,7 +17,7 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
                    const TinyGPSPlus &gps);
 
 // OLED display frames
-enum Frames { SENSORDATA, GPSDATA, NUM_OLED_FRAMES };
+enum Frames { SENSORDATA, GPSDATA, UVDATA, OLEDSETTINGS, NUM_OLED_FRAMES };
 enum Menus { MAINMENU, SENSORS, SETTINGS, SLEEP, NUM_MENUS };
 
 uint64_t displayTimer = millis();
@@ -38,7 +38,7 @@ PCF8574 pcf8574(0x20);
 
 // bool useOled = true;
 volatile bool rightButtonPressed = false;
-volatile bool leftButtonPressed = false;
+// volatile bool leftButtonPressed = false;
 volatile bool selectButtonPressed = false;
 
 /**
@@ -95,6 +95,7 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
         oled.println("Humidity: " + String((int)data.humidity) + "%");
         oled.println("Pressure: " + String(data.pressure) + " hPa");
         oled.println("Wind speed: " + String(data.windSpeed) + " mph");
+        oled.println("Wind dir.: " + String(data.windDirection) + " deg");
         oled.display();
       } break;
 
@@ -115,6 +116,45 @@ void updateDisplay(Adafruit_SSD1306 &oled, Adafruit_ILI9341 &tft,
           oled.println("Altitude: " + String(data.alt) + "m");
           oled.println("Speed: " + String(data.speed) + " mph");
         }
+
+      } break;
+      case UVDATA: {
+        oled.setTextSize(2);
+        oled.println("UV Sensors");
+        oled.setTextSize(1);
+        for (int i = 0; i < 5; i++) {
+          oled.print("UV " + String(i + 1) + ": ");
+          oled.println(data.uv[i]);
+        }
+      } break;
+      case OLEDSETTINGS: {
+          int vpos = 0;
+          oled.setTextSize(2);
+          oled.println("Settings");
+          vpos += 16;
+          oled.setTextSize(1);
+          oled.setCursor(10, vpos);
+          oled.println(
+              "Disp. Rate: " +
+              String(settings.intervals[settings.displayUpdateIntervalIndex]) +
+              " s");
+          vpos += 10;
+          oled.setCursor(10, vpos);
+          oled.println(
+              "Data Rate: " +
+              String(settings.intervals[settings.dataUpdateIntervalIndex]) +
+              " s");
+          vpos += 10;
+          oled.setCursor(10, vpos);
+          oled.println(
+              "Temp. Unit: " +
+              String(settings.temperatureUnit == FAHRENHEIT ? "F" : "C"));
+          vpos += 10;
+          oled.setCursor(10, vpos);
+          oled.println(
+              "OLED Scroll: " +
+              String(settings.intervals[settings.oledScrollRateIntervalIndex]) +
+              " s");
 
       } break;
       default:
@@ -534,60 +574,45 @@ void updateDisplayParams() {
 
 void handleButtonPress() {
   // Check if the user switched to a new menu tab
-
-  // Check if the user clicked on an item
-  if (pcf8574.read(0)) {
-    updateDisplayParams();
-    selectButtonPressed = false;
-    updateDisplay(oled, tft, data, settings, gps);
-    Serial.println("Select button pressed");
-    while (pcf8574.read(0)) {
-      delay(25);
-    }
-  }
-
-  if (pcf8574.read(1)) {
-    rightButtonPressed = false;
+  if (digitalRead(RIGHT_BUTTON) == HIGH) {
+    // rightButtonPressed = false;
+    // selectButtonPressed = false;
     substate += 1;
     Serial.println(substate);
     updateDisplay(oled, tft, data, settings, gps);
     Serial.println("Right button pressed");
-    while (pcf8574.read(1)) {
-      delay(25);
+    while (digitalRead(RIGHT_BUTTON) == HIGH) {
+      delay(20);
     }
   }
 
-  // if (rightButtonPressed) {
-  //   rightButtonPressed = false;
-  //   substate += 1;
-  //   Serial.println(substate);
-  //   updateDisplay(oled, tft, data, settings, gps);
-  //   Serial.println("Right button pressed");
-  // }
-
-  // // Check if the user clicked on an item
-  // if (selectButtonPressed) {
-  //   updateDisplayParams();
-  //   selectButtonPressed = false;
-  //   updateDisplay(oled, tft, data, settings, gps);
-  //   Serial.println("Select button pressed");
-  // }
+  // Check if the user clicked on an item
+  if (digitalRead(SELECT_BUTTON) == HIGH) {
+    updateDisplayParams();
+    // selectButtonPressed = false;
+    // rightButtonPressed = false;
+    updateDisplay(oled, tft, data, settings, gps);
+    Serial.println("Select button pressed");
+    while (digitalRead(SELECT_BUTTON) == HIGH) {
+      delay(20);
+    }
+  }
 }
 
-// void rightButtonPress() {
-//   int timeNow = millis();
-//   if (timeNow > buttonPressTime + debounceDelay) {
-//     rightButtonPressed = true;
-//     buttonPressTime = timeNow;
-//   }
-// }
+void rightButtonPress() {
+  int timeNow = millis();
+  if (timeNow > buttonPressTime + debounceDelay) {
+    rightButtonPressed = true;
+    buttonPressTime = timeNow;
+  }
+}
 
-// void selectButtonPress() {
-//   int timeNow = millis();
-//   if (timeNow > buttonPressTime + debounceDelay) {
-//     selectButtonPressed = true;
-//     buttonPressTime = timeNow;
-//   }
-// }
+void selectButtonPress() {
+  int timeNow = millis();
+  if (timeNow > buttonPressTime + debounceDelay) {
+    selectButtonPressed = true;
+    buttonPressTime = timeNow;
+  }
+}
 
 #endif /* A93137F1_3D59_4BCC_AB39_F7BC8A5C538F */
