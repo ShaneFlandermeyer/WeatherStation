@@ -582,7 +582,7 @@ void handleButtonPress() {
     updateDisplay(oled, tft, data, settings, gps);
     Serial.println("Right button pressed");
     while (digitalRead(RIGHT_BUTTON) == HIGH) {
-      delay(20);
+      delay(10);
     }
   }
 
@@ -594,7 +594,7 @@ void handleButtonPress() {
     updateDisplay(oled, tft, data, settings, gps);
     Serial.println("Select button pressed");
     while (digitalRead(SELECT_BUTTON) == HIGH) {
-      delay(20);
+      delay(10);
     }
   }
 }

@@ -63,7 +63,7 @@ void updateData(SensorData& data, TinyGPSPlus gps, int temperatureUnit) {
   if (gps.location.isValid()) {
     data.lat = gps.location.lat();
     data.lon = gps.location.lng();
-    data.alt = gps.altitude.meters();
+    // data.alt = gps.altitude.meters();
     data.speed = gps.speed.mph();
     data.hour = gps.time.hour();
   }
@@ -72,6 +72,7 @@ void updateData(SensorData& data, TinyGPSPlus gps, int temperatureUnit) {
   Serial.println("Humidity: " + String(data.humidity));
   data.pressure = bme.readPressure() / 100;
   Serial.println("Pressure: " + String(data.pressure) + " hPa");
+  data.alt = bme.readAltitude(1013.25);
   data.windSpeed = readWindSpeed();
   data.windDirection = readWindDirection();
   data.uv = readUV();
@@ -83,7 +84,7 @@ void writeData(fs::FS& fs, SensorData& data, const char* path) {
   File file = fs.open(path);
 
   // CSV column headers
-  String headerStr = "Date, Time, Temperature, Pressure, Humidity, Wind speed, Wind direction, UV1, UV2, UV3, UV4, UV5, Latitude, Longitude, Altitude, Speed, Terrestrial Radiation, Solar Radiation\n";
+  String headerStr = "Date (DDMMYY), Time (UTC), Temperature, Pressure (hPa), Humidity (%), Wind speed (mph), Wind direction (deg), UV1, UV2, UV3, UV4, UV5, Latitude, Longitude, Altitude (m), Speed (mph), Terrestrial Radiation (W/m^2), Solar Radiation (W/m^2)\n";
   // If the first lins is not the CSV column headers, overwrite the garbage data
   String line = file.readStringUntil('\n');
   if (not line.equals(headerStr)) {
@@ -94,7 +95,7 @@ void writeData(fs::FS& fs, SensorData& data, const char* path) {
   // Sensor data
   String dataString = String(data.date) + "," + String(data.hour) + ":" +
                       String(data.minute) + ":" + String(data.second) +
-                      " UTC," + String(data.temperature) + "," +
+                      "," + String(data.temperature) + "," +
                       String(data.pressure) + "," + String(data.humidity) +
                       "," + String(data.windSpeed) + "," + 
                       String(data.windDirection) + ",";
@@ -103,7 +104,8 @@ void writeData(fs::FS& fs, SensorData& data, const char* path) {
     dataString += String(uv) + ",";
   }
   // GPS data
-  dataString += String(data.lat,6) + "," + String(data.lon,6) + "," + String(data.alt) + "," + String(data.speed) + "\n";
+  dataString += String(data.lat,6) + (data.lat > 0 ? " N" : " S") + "," + String(data.lon,6) + 
+                      (data.lon > 0 ? " E" : " W") + "," + String(data.alt) + "," + String(data.speed) + "\n";
   dataString += String(data.solarRadiation) + "," + String(data.terrestrialRadiation) + "\n";
   appendFile(fs, path, dataString.c_str());
 }
@@ -126,9 +128,11 @@ float readTemperature(int unit) {
 float readWindSpeed() {
   analogReadResolution(10);
   const float zeroWindAdjustment =
-      -0.1;  // negative numbers yield smaller wind speeds and vice versa.
-  float tmp_adc = analogRead(TMP);
-  float rv_v = analogRead(RV) * 0.0048828125;
+      0.4;  // negative numbers yield smaller wind speeds and vice versa.
+  // float tmp_adc = analogRead(TMP);
+  // float rv_v = analogRead(RV) * 0.0048828125;
+  float tmp_adc = analogRead(TMP) * 3.3/5.0;
+  float rv_v = analogRead(RV)/1024.0 * 3.3;
 
   
 
@@ -150,7 +154,7 @@ float readWindSpeed() {
 
 float readWindDirection() {
   // Convert the voltage to an angle
-  float windDirection = analogRead(WIND_DIRECTION) * ADC_TO_VOLTAGE / 5 * 359;
+  float windDirection = analogReadMilliVolts(WIND_DIRECTION)*1e-3/3.3*359;
   Serial.println("Wind direction: " + String(windDirection) + " deg");
   return windDirection;
 }
